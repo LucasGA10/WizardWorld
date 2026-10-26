@@ -1,0 +1,119 @@
+CREATE TABLE houseEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    houseColours TEXT NOT NULL,
+    founder TEXT NOT NULL,
+    animal TEXT NOT NULL,
+    element TEXT NOT NULL
+);
+
+CREATE TABLE houseDetailEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    houseColours TEXT NOT NULL,
+    founder TEXT NOT NULL,
+    animal TEXT NOT NULL,
+    element TEXT NOT NULL,
+    ghost TEXT NOT NULL,
+    commonRoom TEXT NOT NULL,
+    FOREIGN KEY (id) REFERENCES houseEntity(id) ON DELETE CASCADE
+);
+
+CREATE TABLE houseHeadEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    houseId TEXT NOT NULL,
+    firstName TEXT NOT NULL,
+    lastName TEXT NOT NULL,
+    FOREIGN KEY (houseId) REFERENCES houseDetailEntity(id) ON DELETE CASCADE
+);
+
+CREATE TABLE houseTraitEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    houseId TEXT NOT NULL,
+    name TEXT NOT NULL,
+    FOREIGN KEY (houseId) REFERENCES houseDetailEntity(id) ON DELETE CASCADE
+);
+
+selectAllHouses:
+SELECT *
+FROM houseEntity
+ORDER BY name ASC;
+
+selectHouseById:
+SELECT *
+FROM houseEntity
+WHERE id = ?;
+
+selectHouseDetailById:
+SELECT *
+FROM houseDetailEntity
+WHERE id = ?;
+
+selectHeadsByHouseId:
+SELECT *
+FROM houseHeadEntity
+WHERE houseId = ?
+ORDER BY lastName ASC, firstName ASC;
+
+selectTraitsByHouseId:
+SELECT *
+FROM houseTraitEntity
+WHERE houseId = ?
+ORDER BY name ASC;
+
+insertHouse:
+INSERT OR REPLACE INTO houseEntity(
+    id,
+    name,
+    houseColours,
+    founder,
+    animal,
+    element
+) VALUES (?, ?, ?, ?, ?, ?);
+
+insertHouseDetail:
+INSERT OR REPLACE INTO houseDetailEntity(
+    id,
+    name,
+    houseColours,
+    founder,
+    animal,
+    element,
+    ghost,
+    commonRoom
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+insertHouseHead:
+INSERT OR REPLACE INTO houseHeadEntity(
+    id,
+    houseId,
+    firstName,
+    lastName
+) VALUES (?, ?, ?, ?);
+
+insertHouseTrait:
+INSERT OR REPLACE INTO houseTraitEntity(
+    id,
+    houseId,
+    name
+) VALUES (?, ?, ?);
+
+deleteHeadsByHouseId:
+DELETE FROM houseHeadEntity
+WHERE houseId = ?;
+
+deleteTraitsByHouseId:
+DELETE FROM houseTraitEntity
+WHERE houseId = ?;
+
+deleteAllHouseHeads:
+DELETE FROM houseHeadEntity;
+
+deleteAllHouseTraits:
+DELETE FROM houseTraitEntity;
+
+deleteAllHouseDetails:
+DELETE FROM houseDetailEntity;
+
+deleteAllHouses:
+DELETE FROM houseEntity;

@@ -2,8 +2,12 @@ package com.example.wizardworld.navigation
 
 import kotlinx.serialization.Serializable
 
-object  Destinations {
+object Destinations {
     @Serializable
-    object HomeRoute
+    data object HouseListRoute
 
+    @Serializable
+    data class HouseDetailRoute(
+        val houseId: String,
+    )
 }

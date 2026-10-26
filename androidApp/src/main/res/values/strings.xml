@@ -1,3 +1,26 @@
 <resources>
     <string name="app_name">WizardWorld</string>
+    <string name="app_logo_cd">WizardWorld emblem</string>
+    <string name="houses_title">Houses of Hogwarts</string>
+    <string name="search_houses">Search by name</string>
+    <string name="search_houses_cd">Search houses</string>
+    <string name="offline_banner">You are viewing cached data. Some information may be out of date.</string>
+    <string name="empty_houses_title">No houses to display</string>
+    <string name="empty_houses_message">The Great Hall is quiet. Pull to refresh or try another search.</string>
+    <string name="empty_house_detail_title">House not found</string>
+    <string name="empty_house_detail_message">This house could not be loaded from the archive.</string>
+    <string name="error_title">A charm went wrong</string>
+    <string name="retry">Try again</string>
+    <string name="navigate_back">Back</string>
+    <string name="house_details">House details</string>
+    <string name="attribute_founder">Founder</string>
+    <string name="attribute_animal">Animal</string>
+    <string name="attribute_colours">Colours</string>
+    <string name="attribute_ghost">Ghost</string>
+    <string name="attribute_element">Element</string>
+    <string name="attribute_common_room">Common room</string>
+    <string name="heads_title">Heads of House</string>
+    <string name="traits_title">Traits</string>
+    <string name="house_animal_label">Animal: %1$s</string>
+    <string name="house_founder_label">Founded by %1$s</string>
 </resources>
