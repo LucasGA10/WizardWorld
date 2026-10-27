@@ -1,13 +1,13 @@
 <resources>
     <string name="app_name">WizardWorld</string>
     <string name="app_logo_cd">WizardWorld emblem</string>
-    <string name="houses_title">Houses of Hogwarts</string>
-    <string name="search_houses">Search by name</string>
-    <string name="search_houses_cd">Search houses</string>
+    <string name="houses_title">Casas de Hogwarts</string>
+    <string name="search_houses">Buscar por nombre</string>
+    <string name="search_houses_cd">Buscar casas</string>
     <string name="offline_banner">You are viewing cached data. Some information may be out of date.</string>
     <string name="empty_houses_title">No houses to display</string>
     <string name="empty_houses_message">The Great Hall is quiet. Pull to refresh or try another search.</string>
-    <string name="empty_house_detail_title">House not found</string>
+    <string name="empty_house_detail_title">Casa no encontrada</string>
     <string name="empty_house_detail_message">This house could not be loaded from the archive.</string>
     <string name="error_title">A charm went wrong</string>
     <string name="retry">Try again</string>
