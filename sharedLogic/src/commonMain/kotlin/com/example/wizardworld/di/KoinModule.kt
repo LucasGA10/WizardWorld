@@ -3,6 +3,7 @@ package com.example.wizardworld.di
 import com.example.wizardworld.data.local.HouseLocalDataSource
 import com.example.wizardworld.data.local.createWizardWorldDatabase
 import com.example.wizardworld.data.local.platformModule
+import com.example.wizardworld.data.remote.WizardWorldApi
 import com.example.wizardworld.data.remote.provideHttpClient
 import com.example.wizardworld.data.repository.HouseRepositoryImpl
 import com.example.wizardworld.domain.repository.HouseRepository
@@ -16,6 +17,7 @@ val sharedModule =
     module {
         includes(platformModule)
         single { provideHttpClient() }
+        single { WizardWorldApi(get()) }
         single { createWizardWorldDatabase(get()) }
         single { HouseLocalDataSource(get()) }
         single<HouseRepository> { HouseRepositoryImpl(get(), get()) }
