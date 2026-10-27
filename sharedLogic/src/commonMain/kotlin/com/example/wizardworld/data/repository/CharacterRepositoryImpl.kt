@@ -4,15 +4,15 @@ import com.example.wizardworld.core.Resource
 import com.example.wizardworld.data.local.CharacterLocalDataSource
 import com.example.wizardworld.data.remote.WizardWorldApi
 import com.example.wizardworld.domain.model.CharacterItem
-import com.example.wizardworld.domain.repository.WizardWorldRepository
+import com.example.wizardworld.domain.repository.CharacterRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlin.coroutines.cancellation.CancellationException
 
-class WizardWorldRepositoryImpl(
+class CharacterRepositoryImpl(
     private val api: WizardWorldApi,
     private val localDataSource: CharacterLocalDataSource,
-) : WizardWorldRepository {
+) : CharacterRepository {
     override fun getCharacters(): Flow<Resource<List<CharacterItem>>> =
         flow {
             emit(Resource.Loading)

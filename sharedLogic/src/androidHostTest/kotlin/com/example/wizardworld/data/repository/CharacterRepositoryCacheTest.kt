@@ -25,7 +25,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
-class WizardWorldRepositoryCacheTest {
+class CharacterRepositoryCacheTest {
     @Test
     fun getCharacters_whenApiSucceeds_emitsLoadingThenSuccessFromLocal() {
         runBlocking {
@@ -105,7 +105,7 @@ class WizardWorldRepositoryCacheTest {
     }
 }
 
-private fun createRepository(engine: MockEngine): WizardWorldRepositoryImpl {
+private fun createRepository(engine: MockEngine): CharacterRepositoryImpl {
     val driver =
         JdbcSqliteDriver(
             url = JdbcSqliteDriver.IN_MEMORY,
@@ -119,7 +119,7 @@ private fun createRepository(engine: MockEngine): WizardWorldRepositoryImpl {
                 json(wizardWorldJson)
             }
         }
-    return WizardWorldRepositoryImpl(WizardWorldApi(httpClient), localDataSource)
+    return CharacterRepositoryImpl(WizardWorldApi(httpClient), localDataSource)
 }
 
 private fun MockRequestHandleScope.respondJson(json: String) =
