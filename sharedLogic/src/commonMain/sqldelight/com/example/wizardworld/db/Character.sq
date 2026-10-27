@@ -1,0 +1,43 @@
+CREATE TABLE characterEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    firstName TEXT,
+    lastName TEXT
+);
+
+CREATE TABLE characterElixirEntity (
+    characterId TEXT NOT NULL,
+    elixirId TEXT,
+    name TEXT,
+    FOREIGN KEY (characterId) REFERENCES characterEntity(id) ON DELETE CASCADE
+);
+
+selectAllCharacters:
+SELECT *
+FROM characterEntity
+ORDER BY lastName ASC, firstName ASC;
+
+selectElixirsByCharacterId:
+SELECT *
+FROM characterElixirEntity
+WHERE characterId = ?
+ORDER BY name ASC;
+
+insertCharacter:
+INSERT OR REPLACE INTO characterEntity(
+    id,
+    firstName,
+    lastName
+) VALUES (?, ?, ?);
+
+insertElixir:
+INSERT INTO characterElixirEntity(
+    characterId,
+    elixirId,
+    name
+) VALUES (?, ?, ?);
+
+deleteAllElixirs:
+DELETE FROM characterElixirEntity;
+
+deleteAllCharacters:
+DELETE FROM characterEntity;
