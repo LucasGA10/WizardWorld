@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 
 data class CharacterListState(
     val currentState: UiState<List<CharacterItem>> = UiState.Loading,
+    // Cree este data class si es que luego la pantalla necesita mas parametros
 )
 
 class CharacterListViewModel(
@@ -21,11 +22,9 @@ class CharacterListViewModel(
     private val _state = MutableStateFlow(CharacterListState())
     val state = _state.asStateFlow()
 
-    init {
-        loadCharacters()
-    }
+    fun loadCharacters(forceRefresh: Boolean = false) {
+        if (!forceRefresh && _state.value.currentState is UiState.Success) return
 
-    fun loadCharacters() {
         viewModelScope.launch {
             getCharactersUseCase().collect { result ->
                 _state.update { currentState ->

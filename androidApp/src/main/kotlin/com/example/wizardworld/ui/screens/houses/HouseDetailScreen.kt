@@ -37,8 +37,8 @@ import com.example.wizardworld.ui.components.EmptyState
 import com.example.wizardworld.ui.components.ErrorState
 import com.example.wizardworld.ui.components.LoadingState
 import com.example.wizardworld.ui.components.OfflineBanner
-import com.example.wizardworld.ui.house.houseAccentColor
-import com.example.wizardworld.ui.house.houseOnAccentColor
+import com.example.wizardworld.ui.screens.houses.components.houseAccentColor
+import com.example.wizardworld.ui.screens.houses.components.houseOnAccentColor
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 

@@ -1,4 +1,4 @@
-package com.example.wizardworld.ui.house
+package com.example.wizardworld.ui.screens.houses.components
 
 import androidx.compose.ui.graphics.Color
 import com.example.wizardworld.ui.theme.GryffindorRed
