@@ -13,6 +13,7 @@ import com.example.wizardworld.domain.repository.HouseRepository
 import com.example.wizardworld.domain.usecases.GetCharactersUseCase
 import com.example.wizardworld.presentation.HouseDetailViewModel
 import com.example.wizardworld.presentation.HouseListViewModel
+import com.example.wizardworld.presentation.characters.CharacterListViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
@@ -38,4 +39,5 @@ val sharedModule =
                 houseRepository = get(),
             )
         }
+        viewModelOf(::CharacterListViewModel)
     }
