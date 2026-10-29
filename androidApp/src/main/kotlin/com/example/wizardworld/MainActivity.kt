@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.wizardworld.navigation.Destinations
+import com.example.wizardworld.ui.screens.characters.CharacterListScreen
 import com.example.wizardworld.ui.screens.houses.HouseDetailScreen
 import com.example.wizardworld.ui.screens.houses.HouseListScreen
 import com.example.wizardworld.ui.theme.WizardWorldTheme
@@ -31,9 +32,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(
-    navController: NavHostController = rememberNavController(),
-) {
+fun MainScreen(navController: NavHostController = rememberNavController()) {
     NavHost(
         navController = navController,
         startDestination = Destinations.HouseListRoute,
@@ -52,6 +51,9 @@ fun MainScreen(
                 houseId = route.houseId,
                 onBack = { navController.popBackStack() },
             )
+        }
+        composable<Destinations.CharacterListRoute> {
+            CharacterListScreen()
         }
     }
 }

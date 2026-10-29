@@ -10,4 +10,7 @@ object Destinations {
     data class HouseDetailRoute(
         val houseId: String,
     )
+
+    @Serializable
+    data object CharacterListRoute
 }
