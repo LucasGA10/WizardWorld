@@ -24,4 +24,6 @@
     <string name="house_animal_label">Animal: %1$s</string>
     <string name="house_founder_label">Founded by %1$s</string>
     <string name="character_list_title">Wizards</string>
+    <string name="nav_houses">Casas</string>
+    <string name="nav_characters">Personajes</string>
 </resources>
