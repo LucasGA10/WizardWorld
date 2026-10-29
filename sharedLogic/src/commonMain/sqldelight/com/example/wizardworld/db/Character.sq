@@ -16,11 +16,20 @@ SELECT *
 FROM characterEntity
 ORDER BY lastName ASC, firstName ASC;
 
+selectCharacterById:
+SELECT *
+FROM characterEntity
+WHERE id = ?;
+
 selectElixirsByCharacterId:
 SELECT *
 FROM characterElixirEntity
 WHERE characterId = ?
 ORDER BY name ASC;
+
+deleteElixirsByCharacterId:
+DELETE FROM characterElixirEntity
+WHERE characterId = ?;
 
 insertCharacter:
 INSERT OR REPLACE INTO characterEntity(

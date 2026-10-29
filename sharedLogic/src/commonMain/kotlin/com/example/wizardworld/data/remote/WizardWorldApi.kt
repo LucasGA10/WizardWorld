@@ -10,4 +10,6 @@ class WizardWorldApi(
 ) {
     // La base URL y expectSuccess ya vienen configurados en provideHttpClient()
     suspend fun getCharacters(): List<CharacterItem> = client.get("Wizards").body()
+
+    suspend fun getCharacter(id: String): CharacterItem = client.get("Wizards/$id").body()
 }
