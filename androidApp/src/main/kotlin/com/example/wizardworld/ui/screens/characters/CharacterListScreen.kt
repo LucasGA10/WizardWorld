@@ -39,7 +39,10 @@ import com.example.wizardworld.ui.screens.characters.components.CharacterListLoa
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun CharacterListScreen(viewModel: CharacterListViewModel = koinViewModel()) {
+fun CharacterListScreen(
+    onCharacterClick: (String) -> Unit,
+    viewModel: CharacterListViewModel = koinViewModel(),
+) {
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -96,7 +99,9 @@ fun CharacterListScreen(viewModel: CharacterListViewModel = koinViewModel()) {
                             items(targetState.data.size) { index ->
                                 CharacterItemCard(
                                     character = targetState.data[index],
-                                    onClick = { /*TODO: CharacterDetailScreen*/ },
+                                    onClick = {
+                                        onCharacterClick(targetState.data[index].id)
+                                    },
                                 )
                             }
                         }
