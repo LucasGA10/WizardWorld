@@ -103,6 +103,60 @@ class CharacterRepositoryCacheTest {
             assertIs<Resource.Offline<*>>(repository.getCharacters().toList().last())
         }
     }
+
+    @Test
+    fun getCharacter_whenApiSucceeds_emitsLoadingThenSuccess() {
+        runBlocking {
+            val repository = createRepository(MockEngine { respondJson(CHARACTER_JSON) })
+
+            val results = repository.getCharacter(HERMIONE_ID).toList()
+
+            assertEquals(Resource.Loading, results.first())
+            val success = assertIs<Resource.Success<CharacterItem>>(results.last())
+            assertEquals(HERMIONE_ID, success.data.id)
+            assertEquals("Hermione", success.data.firstName)
+            assertEquals(listOf("Polyjuice Potion"), success.data.elixirs.map { it.name })
+        }
+    }
+
+    @Test
+    fun getCharacter_whenApiFailsAfterCache_emitsOffline() {
+        runBlocking {
+            var isOnline = true
+            val repository =
+                createRepository(
+                    MockEngine {
+                        if (isOnline) {
+                            respondJson(WIZARDS_JSON)
+                        } else {
+                            respondError(HttpStatusCode.RequestTimeout)
+                        }
+                    },
+                )
+            repository.getCharacters().toList()
+            isOnline = false
+
+            val results = repository.getCharacter(HERMIONE_ID).toList()
+
+            assertEquals(Resource.Loading, results.first())
+            val offline = assertIs<Resource.Offline<CharacterItem>>(results.last())
+            assertEquals(HERMIONE_ID, offline.data.id)
+            assertEquals(listOf("Polyjuice Potion"), offline.data.elixirs.map { it.name })
+        }
+    }
+
+    @Test
+    fun getCharacter_whenApiFailsWithoutCache_emitsError() {
+        runBlocking {
+            val repository =
+                createRepository(MockEngine { respondError(HttpStatusCode.RequestTimeout) })
+
+            val results = repository.getCharacter(HERMIONE_ID).toList()
+
+            assertEquals(Resource.Loading, results.first())
+            assertIs<Resource.Error>(results.last())
+        }
+    }
 }
 
 private fun createRepository(engine: MockEngine): CharacterRepositoryImpl {
@@ -146,4 +200,17 @@ private const val WIZARDS_JSON = """
     ]
   }
 ]
+"""
+
+private const val HERMIONE_ID = "a1b2c3d4-0000-0000-0000-000000000002"
+
+private const val CHARACTER_JSON = """
+{
+  "id": "a1b2c3d4-0000-0000-0000-000000000002",
+  "firstName": "Hermione",
+  "lastName": "Granger",
+  "elixirs": [
+    { "id": "e1", "name": "Polyjuice Potion" }
+  ]
+}
 """

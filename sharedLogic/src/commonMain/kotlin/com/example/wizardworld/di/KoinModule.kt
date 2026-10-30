@@ -10,6 +10,7 @@ import com.example.wizardworld.data.repository.CharacterRepositoryImpl
 import com.example.wizardworld.data.repository.HouseRepositoryImpl
 import com.example.wizardworld.domain.repository.CharacterRepository
 import com.example.wizardworld.domain.repository.HouseRepository
+import com.example.wizardworld.domain.usecases.GetCharacterDetailUseCase
 import com.example.wizardworld.domain.usecases.GetCharactersUseCase
 import com.example.wizardworld.presentation.HouseDetailViewModel
 import com.example.wizardworld.presentation.HouseListViewModel
@@ -32,6 +33,7 @@ val sharedModule =
         singleOf(::CharacterLocalDataSource)
         singleOf(::CharacterRepositoryImpl) bind CharacterRepository::class
         factoryOf(::GetCharactersUseCase)
+        factoryOf(::GetCharacterDetailUseCase)
         viewModelOf(::HouseListViewModel)
         viewModel { parameters ->
             HouseDetailViewModel(

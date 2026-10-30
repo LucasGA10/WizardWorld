@@ -34,6 +34,29 @@ class CharacterRepositoryImpl(
                 }
             emit(result)
         }
+
+    override fun getCharacter(id: String): Flow<Resource<CharacterItem>> =
+        flow {
+                emit(Resource.Loading)
+                val result =
+                    try {
+                        val character = api.getCharacter(id)
+                        localDataSource.replaceCharacter(character)
+                        Resource.Success(character)
+                    } catch (exception: CancellationException) {
+                        throw exception
+                    } catch (exception: Exception) {
+                        val cached = localDataSource.getCharacter(id)
+                        val message = exception.message ?: DEFAULT_CHARACTER_ERROR_MESSAGE
+                        if (cached != null) {
+                            Resource.Offline(data = cached, message = message)
+                        } else {
+                            Resource.Error(message = message)
+                        }
+                    }
+                emit(result)
+        }
 }
 
 private const val DEFAULT_ERROR_MESSAGE = "Unable to load characters."
+private const val DEFAULT_CHARACTER_ERROR_MESSAGE = "Unable to load character."

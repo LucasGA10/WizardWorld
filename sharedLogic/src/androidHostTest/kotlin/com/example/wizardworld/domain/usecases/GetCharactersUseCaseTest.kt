@@ -31,4 +31,7 @@ private class FakeCharacterRepository(
     private vararg val emissions: Resource<List<CharacterItem>>,
 ) : CharacterRepository {
     override fun getCharacters(): Flow<Resource<List<CharacterItem>>> = flowOf(*emissions)
+
+    override fun getCharacter(id: String): Flow<Resource<CharacterItem>> =
+        flowOf(Resource.Error("Character details are not configured in this fake."))
 }

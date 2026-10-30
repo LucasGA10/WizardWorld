@@ -6,4 +6,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface CharacterRepository {
     fun getCharacters(): Flow<Resource<List<CharacterItem>>>
+
+    fun getCharacter(id: String): Flow<Resource<CharacterItem>>
 }
