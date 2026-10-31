@@ -13,8 +13,9 @@ val wizardWorldJson =
     }
 
 const val WIZARD_WORLD_API_BASE_URL = "https://wizard-world-api.herokuapp.com/"
+const val HP_API_BASE_URL = "https://hp-api.onrender.com/api/"
 
-fun provideHttpClient(): HttpClient =
+fun provideWizardWorldHttpClient(): HttpClient =
     HttpClient(provideHttpClientEngine()) {
         expectSuccess = true
         install(ContentNegotiation) {
@@ -22,5 +23,16 @@ fun provideHttpClient(): HttpClient =
         }
         defaultRequest {
             url(WIZARD_WORLD_API_BASE_URL)
+        }
+    }
+
+fun provideHpHttpClient(): HttpClient =
+    HttpClient(provideHttpClientEngine()) {
+        expectSuccess = true
+        install(ContentNegotiation) {
+            json(wizardWorldJson)
+        }
+        defaultRequest {
+            url(HP_API_BASE_URL)
         }
     }

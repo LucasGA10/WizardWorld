@@ -1,9 +1,12 @@
 package com.example.wizardworld.ui.screens.characters.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -15,19 +18,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale.Companion.Crop
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.wizardworld.domain.model.CharacterItem
+import coil3.compose.AsyncImage
+import com.example.wizardworld.domain.model.HpCharacter
 
 @Composable
 fun CharacterItemCard(
-    character: CharacterItem,
+    character: HpCharacter,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
-    val firstName = character.firstName
-    val lastName = character.lastName
-
     Card(
         modifier = modifier,
         colors =
@@ -37,56 +41,49 @@ fun CharacterItemCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         onClick = onClick,
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            CharacterAvatar(firstName = firstName, lastName = lastName)
+            Column {
+                AsyncImage(
+                    model = character.imageUrl,
+                    contentDescription = null,
+                    contentScale = Crop,
+                    alignment = Alignment.TopCenter,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(140.dp)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                )
 
-            Column(modifier = Modifier.padding(start = 12.dp)) {
-                if (firstName != null) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(8.dp),
+                ) {
                     Text(
-                        text = firstName,
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                }
-                if (lastName != null) {
-                    Text(
-                        text = lastName,
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = character.name,
+                        style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth(),
                     )
+
+                    if (character.house != null) {
+                        Text(
+                            text = character.house!!,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun CharacterAvatar(
-    firstName: String?,
-    lastName: String?,
-    modifier: Modifier = Modifier,
-) {
-    val initials =
-        listOfNotNull(firstName?.firstOrNull(), lastName?.firstOrNull())
-            .joinToString("")
-            .ifBlank { "?" }
-            .uppercase()
-
-    Box(
-        modifier =
-            modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.secondary),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = initials,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSecondary,
-        )
     }
 }

@@ -3,7 +3,7 @@ package com.example.wizardworld.presentation.characters
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wizardworld.core.Resource
-import com.example.wizardworld.domain.model.CharacterItem
+import com.example.wizardworld.domain.model.HpCharacter
 import com.example.wizardworld.domain.usecases.GetCharactersUseCase
 import com.example.wizardworld.presentation.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,8 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class CharacterListState(
-    val currentState: UiState<List<CharacterItem>> = UiState.Loading,
-    // Cree este data class si es que luego la pantalla necesita mas parametros
+    val currentState: UiState<List<HpCharacter>> = UiState.Loading,
 )
 
 class CharacterListViewModel(
