@@ -4,6 +4,7 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.example.wizardworld.core.Resource
 import com.example.wizardworld.data.local.CharacterLocalDataSource
 import com.example.wizardworld.data.local.createWizardWorldDatabase
+import com.example.wizardworld.data.remote.HpApi
 import com.example.wizardworld.data.remote.WizardWorldApi
 import com.example.wizardworld.data.remote.wizardWorldJson
 import com.example.wizardworld.db.WizardWorldDatabase
@@ -26,12 +27,16 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 class CharacterRepositoryCacheTest {
+    // Varios de estos test no representan getCharacters() actualmente, sino a getCharactersWithElixirs().
+    // Los test para getCharacter() se agregarán con la issue "Búsqueda y favoritos" (#27b)
+    // que se encargará de guardar localmente los personajes en la pantalla de favoritos.
+
     @Test
     fun getCharacters_whenApiSucceeds_emitsLoadingThenSuccessFromLocal() {
         runBlocking {
             val repository = createRepository(MockEngine { respondJson(WIZARDS_JSON) })
 
-            val results = repository.getCharacters().toList()
+            val results = repository.getCharactersWithElixirs().toList()
 
             assertEquals(Resource.Loading, results.first())
             val success = assertIs<Resource.Success<List<CharacterItem>>>(results.last())
@@ -58,10 +63,10 @@ class CharacterRepositoryCacheTest {
                     },
                 )
 
-            assertIs<Resource.Success<*>>(repository.getCharacters().toList().last())
+            assertIs<Resource.Success<*>>(repository.getCharactersWithElixirs().toList().last())
             isOnline = false
 
-            val results = repository.getCharacters().toList()
+            val results = repository.getCharactersWithElixirs().toList()
 
             assertEquals(Resource.Loading, results.first())
             val offline = assertIs<Resource.Offline<List<CharacterItem>>>(results.last())
@@ -75,7 +80,7 @@ class CharacterRepositoryCacheTest {
             val repository =
                 createRepository(MockEngine { respondError(HttpStatusCode.RequestTimeout) })
 
-            val results = repository.getCharacters().toList()
+            val results = repository.getCharactersWithElixirs().toList()
 
             assertEquals(Resource.Loading, results.first())
             assertIs<Resource.Error>(results.last())
@@ -97,51 +102,10 @@ class CharacterRepositoryCacheTest {
                     },
                 )
 
-            assertIs<Resource.Success<*>>(repository.getCharacters().toList().last())
+            assertIs<Resource.Success<*>>(repository.getCharactersWithElixirs().toList().last())
             isRateLimited = true
 
-            assertIs<Resource.Offline<*>>(repository.getCharacters().toList().last())
-        }
-    }
-
-    @Test
-    fun getCharacter_whenApiSucceeds_emitsLoadingThenSuccess() {
-        runBlocking {
-            val repository = createRepository(MockEngine { respondJson(CHARACTER_JSON) })
-
-            val results = repository.getCharacter(HERMIONE_ID).toList()
-
-            assertEquals(Resource.Loading, results.first())
-            val success = assertIs<Resource.Success<CharacterItem>>(results.last())
-            assertEquals(HERMIONE_ID, success.data.id)
-            assertEquals("Hermione", success.data.firstName)
-            assertEquals(listOf("Polyjuice Potion"), success.data.elixirs.map { it.name })
-        }
-    }
-
-    @Test
-    fun getCharacter_whenApiFailsAfterCache_emitsOffline() {
-        runBlocking {
-            var isOnline = true
-            val repository =
-                createRepository(
-                    MockEngine {
-                        if (isOnline) {
-                            respondJson(WIZARDS_JSON)
-                        } else {
-                            respondError(HttpStatusCode.RequestTimeout)
-                        }
-                    },
-                )
-            repository.getCharacters().toList()
-            isOnline = false
-
-            val results = repository.getCharacter(HERMIONE_ID).toList()
-
-            assertEquals(Resource.Loading, results.first())
-            val offline = assertIs<Resource.Offline<CharacterItem>>(results.last())
-            assertEquals(HERMIONE_ID, offline.data.id)
-            assertEquals(listOf("Polyjuice Potion"), offline.data.elixirs.map { it.name })
+            assertIs<Resource.Offline<*>>(repository.getCharactersWithElixirs().toList().last())
         }
     }
 
@@ -173,7 +137,7 @@ private fun createRepository(engine: MockEngine): CharacterRepositoryImpl {
                 json(wizardWorldJson)
             }
         }
-    return CharacterRepositoryImpl(WizardWorldApi(httpClient), localDataSource)
+    return CharacterRepositoryImpl(HpApi(HttpClient()),WizardWorldApi(httpClient), localDataSource)
 }
 
 private fun MockRequestHandleScope.respondJson(json: String) =

@@ -2,24 +2,28 @@ package com.example.wizardworld.data.repository
 
 import com.example.wizardworld.core.Resource
 import com.example.wizardworld.data.local.CharacterLocalDataSource
+import com.example.wizardworld.data.remote.HpApi
 import com.example.wizardworld.data.remote.WizardWorldApi
+import com.example.wizardworld.data.remote.mapper.toDomain
 import com.example.wizardworld.domain.model.CharacterItem
+import com.example.wizardworld.domain.model.HpCharacter
 import com.example.wizardworld.domain.repository.CharacterRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlin.coroutines.cancellation.CancellationException
 
 class CharacterRepositoryImpl(
-    private val api: WizardWorldApi,
+    private val hpApi: HpApi,
+    private val wizardWorldApi: WizardWorldApi,
     private val localDataSource: CharacterLocalDataSource,
 ) : CharacterRepository {
-    override fun getCharacters(): Flow<Resource<List<CharacterItem>>> =
+    override fun getCharactersWithElixirs(): Flow<Resource<List<CharacterItem>>> =
         flow {
             emit(Resource.Loading)
             // Se emite fuera del try para no confundir errores del colector con errores de red
             val result =
                 try {
-                    localDataSource.replaceCharacters(api.getCharacters())
+                    localDataSource.replaceCharacters(wizardWorldApi.getCharacters())
                     Resource.Success(localDataSource.getCharacters())
                 } catch (exception: CancellationException) {
                     throw exception
@@ -35,26 +39,36 @@ class CharacterRepositoryImpl(
             emit(result)
         }
 
-    override fun getCharacter(id: String): Flow<Resource<CharacterItem>> =
+    override fun getCharacters(): Flow<Resource<List<HpCharacter>>> =
         flow {
-                emit(Resource.Loading)
-                val result =
-                    try {
-                        val character = api.getCharacter(id)
-                        localDataSource.replaceCharacter(character)
-                        Resource.Success(character)
-                    } catch (exception: CancellationException) {
-                        throw exception
-                    } catch (exception: Exception) {
-                        val cached = localDataSource.getCharacter(id)
-                        val message = exception.message ?: DEFAULT_CHARACTER_ERROR_MESSAGE
-                        if (cached != null) {
-                            Resource.Offline(data = cached, message = message)
-                        } else {
-                            Resource.Error(message = message)
-                        }
-                    }
-                emit(result)
+            emit(Resource.Loading)
+            val result =
+                try {
+                    val characters = hpApi.getCharacters().map { it.toDomain() }
+                    Resource.Success(characters)
+                } catch (exception: CancellationException) {
+                    throw exception
+                } catch (exception: Exception) {
+                    val message = exception.message ?: DEFAULT_ERROR_MESSAGE
+                    Resource.Error(message = message)
+                }
+            emit(result)
+        }
+
+    override fun getCharacter(id: String): Flow<Resource<HpCharacter>> =
+        flow {
+            emit(Resource.Loading)
+            val result =
+                try {
+                    val character = hpApi.getCharacter(id).first().toDomain()
+                    Resource.Success(character)
+                } catch (exception: CancellationException) {
+                    throw exception
+                } catch (exception: Exception) {
+                    val message = exception.message ?: DEFAULT_CHARACTER_ERROR_MESSAGE
+                    Resource.Error(message = message)
+                }
+            emit(result)
         }
 }
 

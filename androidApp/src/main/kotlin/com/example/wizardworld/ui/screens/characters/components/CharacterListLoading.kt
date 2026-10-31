@@ -4,15 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -49,39 +45,40 @@ private fun CharacterItemLoadingCard(modifier: Modifier = Modifier) {
             ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Box(
-                modifier =
-                    Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .shimmer(),
-            )
-
-            Column(
-                modifier = Modifier.padding(start = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
+            Column {
                 Box(
                     modifier =
                         Modifier
-                            .height(16.dp)
-                            .width(80.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .fillMaxWidth()
+                            .height(140.dp)
                             .shimmer(),
                 )
-
-                Box(
-                    modifier =
-                        Modifier
-                            .height(14.dp)
-                            .width(60.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .shimmer(),
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(8.dp),
+                ) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth(0.85f)
+                                .height(18.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .shimmer(),
+                    )
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth(0.55f)
+                                .height(14.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .shimmer(),
+                    )
+                }
             }
         }
     }
