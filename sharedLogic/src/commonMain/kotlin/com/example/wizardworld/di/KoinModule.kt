@@ -2,6 +2,7 @@ package com.example.wizardworld.di
 
 import com.example.wizardworld.data.local.CharacterLocalDataSource
 import com.example.wizardworld.data.local.HouseLocalDataSource
+import com.example.wizardworld.data.local.HpCharacterLocalDataSource
 import com.example.wizardworld.data.local.createWizardWorldDatabase
 import com.example.wizardworld.data.local.platformModule
 import com.example.wizardworld.data.remote.HpApi
@@ -16,6 +17,7 @@ import com.example.wizardworld.domain.usecases.GetCharacterDetailUseCase
 import com.example.wizardworld.domain.usecases.GetCharactersUseCase
 import com.example.wizardworld.presentation.HouseDetailViewModel
 import com.example.wizardworld.presentation.HouseListViewModel
+import com.example.wizardworld.presentation.characters.CharacterDetailViewModel
 import com.example.wizardworld.presentation.characters.CharacterListViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
@@ -48,6 +50,7 @@ val sharedModule =
         factoryOf(::GetCharactersUseCase)
         factoryOf(::GetCharacterDetailUseCase)
         viewModelOf(::HouseListViewModel)
+        singleOf(::HpCharacterLocalDataSource)
         viewModel { parameters ->
             HouseDetailViewModel(
                 houseId = parameters.get(),
@@ -55,4 +58,11 @@ val sharedModule =
             )
         }
         viewModelOf(::CharacterListViewModel)
+
+        viewModel { parameters ->
+            CharacterDetailViewModel(
+                characterId = parameters.get(),
+                getCharacterDetailUseCase = get(),
+            )
+        }
     }

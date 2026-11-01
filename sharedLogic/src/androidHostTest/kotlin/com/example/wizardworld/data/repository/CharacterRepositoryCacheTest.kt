@@ -137,7 +137,7 @@ private fun createRepository(engine: MockEngine): CharacterRepositoryImpl {
                 json(wizardWorldJson)
             }
         }
-    return CharacterRepositoryImpl(HpApi(HttpClient()),WizardWorldApi(httpClient), localDataSource)
+    return CharacterRepositoryImpl(HpApi(HttpClient()), WizardWorldApi(httpClient), localDataSource)
 }
 
 private fun MockRequestHandleScope.respondJson(json: String) =
