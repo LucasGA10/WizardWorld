@@ -8,6 +8,5 @@ import kotlinx.coroutines.flow.Flow
 class GetCharactersWhitElixirsUseCase(
     private val repository: CharacterRepository,
 ) {
-    operator fun invoke(): Flow<Resource<List<CharacterItem>>> =
-        repository.getCharactersWithElixirs()
+    operator fun invoke(): Flow<Resource<List<CharacterItem>>> = repository.getCharactersWithElixirs()
 }

@@ -1,11 +1,14 @@
 package com.example.wizardworld.domain.model
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Wand(
     val wood: String?,
     val core: String?,
     val length: Double?,
 )
 
+@Serializable
 data class HpCharacter(
     val id: String,
     val name: String,

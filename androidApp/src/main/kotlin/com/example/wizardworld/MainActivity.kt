@@ -32,8 +32,10 @@ import androidx.navigation.toRoute
 import com.example.wizardworld.navigation.Destinations
 import com.example.wizardworld.ui.screens.characters.CharacterListScreen
 import com.example.wizardworld.ui.screens.houses.HouseDetailScreen
+import com.example.wizardworld.ui.screens.characters.CharacterDetailScreen
 import com.example.wizardworld.ui.screens.houses.HouseListScreen
 import com.example.wizardworld.ui.theme.WizardWorldTheme
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -162,16 +164,19 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
                     },
                 )
             }
-
+            
             composable<Destinations.CharacterDetailRoute> { backStackEntry ->
                 val route =
                     backStackEntry.toRoute<Destinations.CharacterDetailRoute>()
 
-                Column {
-                    Text(text = "Detalle del personaje")
-                    Text(text = "ID: ${route.characterId}")
-                }
+                CharacterDetailScreen(
+                    characterId = route.characterId,
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                )
             }
+
         }
     }
 }

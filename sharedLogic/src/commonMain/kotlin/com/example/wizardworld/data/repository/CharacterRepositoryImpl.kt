@@ -2,6 +2,7 @@ package com.example.wizardworld.data.repository
 
 import com.example.wizardworld.core.Resource
 import com.example.wizardworld.data.local.CharacterLocalDataSource
+import com.example.wizardworld.data.local.HpCharacterLocalDataSource
 import com.example.wizardworld.data.remote.HpApi
 import com.example.wizardworld.data.remote.WizardWorldApi
 import com.example.wizardworld.data.remote.mapper.toDomain
@@ -16,6 +17,7 @@ class CharacterRepositoryImpl(
     private val hpApi: HpApi,
     private val wizardWorldApi: WizardWorldApi,
     private val localDataSource: CharacterLocalDataSource,
+    private val hpLocalDataSource: HpCharacterLocalDataSource,
 ) : CharacterRepository {
     override fun getCharactersWithElixirs(): Flow<Resource<List<CharacterItem>>> =
         flow {
@@ -58,16 +60,35 @@ class CharacterRepositoryImpl(
     override fun getCharacter(id: String): Flow<Resource<HpCharacter>> =
         flow {
             emit(Resource.Loading)
+
             val result =
                 try {
                     val character = hpApi.getCharacter(id).first().toDomain()
+
+                    hpLocalDataSource.saveCharacter(character)
+
                     Resource.Success(character)
                 } catch (exception: CancellationException) {
                     throw exception
                 } catch (exception: Exception) {
-                    val message = exception.message ?: DEFAULT_CHARACTER_ERROR_MESSAGE
-                    Resource.Error(message = message)
+                    val cached = hpLocalDataSource.getCharacter(id)
+
+                    if (cached != null) {
+                        Resource.Offline(
+                            data = cached,
+                            message =
+                                exception.message
+                                    ?: DEFAULT_CHARACTER_ERROR_MESSAGE,
+                        )
+                    } else {
+                        Resource.Error(
+                            message =
+                                exception.message
+                                    ?: DEFAULT_CHARACTER_ERROR_MESSAGE,
+                        )
+                    }
                 }
+
             emit(result)
         }
 }

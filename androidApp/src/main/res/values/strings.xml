@@ -26,4 +26,29 @@
     <string name="character_list_title">Wizards</string>
     <string name="nav_houses">Casas</string>
     <string name="nav_characters">Personajes</string>
+
+    <!-- Detalle de personajes -->
+    <string name="character_detail_title">Detalle del personaje</string>
+    <string name="character_detail_back">Volver</string>
+    <string name="character_detail_not_found">Personaje no encontrado</string>
+    <string name="character_detail_not_found_message">No se encontró información de este personaje.</string>
+
+    <!-- Atributos -->
+    <string name="character_detail_house">Casa</string>
+    <string name="character_detail_species">Especie</string>
+    <string name="character_detail_gender">Género</string>
+    <string name="character_detail_birth">Nacimiento</string>
+    <string name="character_detail_patronus">Patronus</string>
+    <string name="character_detail_status">Estado</string>
+    <string name="character_detail_actor">Actor / Actriz</string>
+    <string name="character_detail_wand">Varita mágica</string>
+    <string name="character_detail_wood">Madera</string>
+    <string name="character_detail_core">Núcleo</string>
+
+    <!-- Valores -->
+    <string name="character_detail_unknown_masculine">Desconocido</string>
+    <string name="character_detail_unknown_feminine">Desconocida</string>
+    <string name="character_detail_alive">Vivo</string>
+    <string name="character_detail_deceased">Fallecido</string>
+
 </resources>

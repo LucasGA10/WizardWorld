@@ -1,0 +1,16 @@
+
+CREATE TABLE hpCharacterEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    json TEXT NOT NULL
+);
+
+selectHpCharacterById:
+SELECT *
+FROM hpCharacterEntity
+WHERE id = ?;
+
+insertHpCharacter:
+INSERT OR REPLACE INTO hpCharacterEntity(
+    id,
+    json
+) VALUES (?, ?);
