@@ -13,7 +13,7 @@ val wizardWorldJson =
     }
 
 const val WIZARD_WORLD_API_BASE_URL = "https://wizard-world-api.herokuapp.com/"
-const val HP_API_BASE_URL = "https://hp-api.onrender.com/api/"
+const val HP_API_BASE_URL = "https://api.potterdb.com/v1/"
 
 fun provideWizardWorldHttpClient(): HttpClient =
     HttpClient(provideHttpClientEngine()) {

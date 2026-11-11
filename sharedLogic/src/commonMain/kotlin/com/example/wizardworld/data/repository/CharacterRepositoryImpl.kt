@@ -8,9 +8,11 @@ import com.example.wizardworld.data.remote.WizardWorldApi
 import com.example.wizardworld.data.remote.mapper.toDomain
 import com.example.wizardworld.domain.model.CharacterItem
 import com.example.wizardworld.domain.model.HpCharacter
+import com.example.wizardworld.domain.model.HpCharacterPage
 import com.example.wizardworld.domain.repository.CharacterRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
 
 class CharacterRepositoryImpl(
@@ -41,18 +43,25 @@ class CharacterRepositoryImpl(
             emit(result)
         }
 
-    override fun getCharacters(): Flow<Resource<List<HpCharacter>>> =
+    override fun getCharacters(nameQuery: String?): Flow<Resource<HpCharacterPage>> =
         flow {
             emit(Resource.Loading)
             val result =
                 try {
-                    val characters = hpApi.getCharacters().map { it.toDomain() }
-                    Resource.Success(characters)
+                    val response = hpApi.getCharacters(nameQuery = nameQuery)
+                    val data =
+                        HpCharacterPage(
+                            characters = response.data.map { it.toDomain() },
+                            paginationMeta = response.meta.toDomain(),
+                        )
+                    Resource.Success(data)
                 } catch (exception: CancellationException) {
                     throw exception
                 } catch (exception: Exception) {
-                    val message = exception.message ?: DEFAULT_ERROR_MESSAGE
-                    Resource.Error(message = message)
+                    when (exception) {
+                        is IOException -> Resource.Error(CONNECTION_ERROR_MESSAGE)
+                        else -> Resource.Error(exception.message ?: DEFAULT_ERROR_MESSAGE)
+                    }
                 }
             emit(result)
         }
@@ -81,11 +90,10 @@ class CharacterRepositoryImpl(
                                     ?: DEFAULT_CHARACTER_ERROR_MESSAGE,
                         )
                     } else {
-                        Resource.Error(
-                            message =
-                                exception.message
-                                    ?: DEFAULT_CHARACTER_ERROR_MESSAGE,
-                        )
+                        when (exception) {
+                            is IOException -> Resource.Error(CONNECTION_ERROR_MESSAGE)
+                            else -> Resource.Error(exception.message ?: DEFAULT_ERROR_MESSAGE)
+                        }
                     }
                 }
 
@@ -93,5 +101,6 @@ class CharacterRepositoryImpl(
         }
 }
 
-private const val DEFAULT_ERROR_MESSAGE = "Unable to load characters."
+private const val DEFAULT_ERROR_MESSAGE = "No se a podido encontrar a los magos."
 private const val DEFAULT_CHARACTER_ERROR_MESSAGE = "Unable to load character."
+private const val CONNECTION_ERROR_MESSAGE = "No se a podido conectar a internet, revise su conexión."

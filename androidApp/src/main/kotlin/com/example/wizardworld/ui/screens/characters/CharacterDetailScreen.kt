@@ -235,27 +235,19 @@ private fun CharacterDetailContent(character: HpCharacter) {
             modifier = Modifier.fillMaxWidth(),
         )
 
-        character.wand?.let { wand ->
+        if (character.wands.isNotEmpty()) {
             Text(
                 text = stringResource(R.string.character_detail_wand),
                 style = MaterialTheme.typography.titleLarge,
             )
 
-            CharacterAttributeCard(
-                title = stringResource(R.string.character_detail_wood),
-                value = wand.wood.orEmpty().ifBlank {
-                    unknownFeminine
-                },
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            CharacterAttributeCard(
-                title = stringResource(R.string.character_detail_core),
-                value = wand.core.orEmpty().ifBlank {
-                    unknownMasculine
-                },
-                modifier = Modifier.fillMaxWidth(),
-            )
+            character.wands.forEach { wand ->
+                CharacterAttributeCard(
+                    title = stringResource(R.string.character_detail_wand),
+                    value = wand,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
