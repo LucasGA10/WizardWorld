@@ -129,7 +129,9 @@ private fun createRepository(engine: MockEngine): CharacterRepositoryImpl {
             url = JdbcSqliteDriver.IN_MEMORY,
             schema = WizardWorldDatabase.Schema,
         )
-    val localDataSource = CharacterLocalDataSource(createWizardWorldDatabase(driver))
+    val database = createWizardWorldDatabase(driver)
+    val localDataSource = CharacterLocalDataSource(database)
+    val hpLocalDataSource = com.example.wizardworld.data.local.HpCharacterLocalDataSource(database)
     val httpClient =
         HttpClient(engine) {
             expectSuccess = true
@@ -137,7 +139,12 @@ private fun createRepository(engine: MockEngine): CharacterRepositoryImpl {
                 json(wizardWorldJson)
             }
         }
-    return CharacterRepositoryImpl(HpApi(HttpClient()), WizardWorldApi(httpClient), localDataSource)
+    return CharacterRepositoryImpl(
+        hpApi = HpApi(httpClient),
+        wizardWorldApi = WizardWorldApi(httpClient),
+        localDataSource = localDataSource,
+        hpLocalDataSource = hpLocalDataSource,
+    )
 }
 
 private fun MockRequestHandleScope.respondJson(json: String) =
