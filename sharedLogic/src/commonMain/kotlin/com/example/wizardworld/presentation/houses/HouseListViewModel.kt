@@ -1,9 +1,11 @@
-package com.example.wizardworld.presentation
+package com.example.wizardworld.presentation.houses
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wizardworld.domain.model.HouseListItem
-import com.example.wizardworld.domain.repository.HouseRepository
+import com.example.wizardworld.domain.usecases.GetHousesUseCase
+import com.example.wizardworld.presentation.UiState
+import com.example.wizardworld.presentation.toUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +16,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class HouseListViewModel(
-    private val houseRepository: HouseRepository,
+    private val getHousesUseCase: GetHousesUseCase,
 ) : ViewModel() {
     private val unfilteredState =
         MutableStateFlow<UiState<List<HouseListItem>>>(UiState.Loading)
@@ -79,7 +81,7 @@ class HouseListViewModel(
                 unfilteredState.value = UiState.Loading
             }
             unfilteredState.value =
-                houseRepository.getHouses().toUiState { houses -> houses.isEmpty() }
+                getHousesUseCase().toUiState { houses -> houses.isEmpty() }
             _isRefreshing.value = false
         }
     }

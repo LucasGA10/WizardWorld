@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.wizardworld.R
 import com.example.wizardworld.domain.model.House
-import com.example.wizardworld.presentation.HouseDetailViewModel
+import com.example.wizardworld.presentation.houses.HouseDetailViewModel
 import com.example.wizardworld.presentation.UiState
 import com.example.wizardworld.ui.components.EmptyState
 import com.example.wizardworld.ui.components.ErrorState
