@@ -299,6 +299,7 @@ private fun CharacterImage(character: HpCharacter) {
                 model = character.imageUrl,
                 contentDescription = character.name,
                 contentScale = ContentScale.Crop,
+                alignment = Alignment.TopCenter,
                 onError = {
                     imageError = true
                 },

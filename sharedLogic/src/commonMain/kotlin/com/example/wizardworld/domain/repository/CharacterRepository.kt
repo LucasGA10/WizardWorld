@@ -9,7 +9,11 @@ import kotlinx.coroutines.flow.Flow
 interface CharacterRepository {
     fun getCharactersWithElixirs(): Flow<Resource<List<CharacterItem>>>
 
-    fun getCharacters(nameQuery: String? = null): Flow<Resource<HpCharacterPage>>
+    fun getCharacters(
+        nameQuery: String? = null,
+        pageNumber: Int? = null,
+        pageSize: Int? = null,
+    ): Flow<Resource<HpCharacterPage>>
 
     fun getCharacter(id: String): Flow<Resource<HpCharacter>>
 }

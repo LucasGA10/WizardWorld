@@ -43,12 +43,21 @@ class CharacterRepositoryImpl(
             emit(result)
         }
 
-    override fun getCharacters(nameQuery: String?): Flow<Resource<HpCharacterPage>> =
+    override fun getCharacters(
+        nameQuery: String?,
+        pageNumber: Int?,
+        pageSize: Int?,
+    ): Flow<Resource<HpCharacterPage>> =
         flow {
             emit(Resource.Loading)
             val result =
                 try {
-                    val response = hpApi.getCharacters(nameQuery = nameQuery)
+                    val response =
+                        hpApi.getCharacters(
+                            nameQuery = nameQuery,
+                            pageNumber = pageNumber,
+                            pageSize = pageSize,
+                        )
                     val data =
                         HpCharacterPage(
                             characters = response.data.map { it.toDomain() },

@@ -8,5 +8,14 @@ import kotlinx.coroutines.flow.Flow
 class GetCharactersUseCase(
     private val repository: CharacterRepository,
 ) {
-    operator fun invoke(nameQuery: String? = null): Flow<Resource<HpCharacterPage>> = repository.getCharacters(nameQuery)
+    operator fun invoke(
+        nameQuery: String? = null,
+        pageNumber: Int? = null,
+        pageSize: Int? = null,
+    ): Flow<Resource<HpCharacterPage>> =
+        repository.getCharacters(
+            nameQuery = nameQuery,
+            pageNumber = pageNumber,
+            pageSize = pageSize,
+        )
 }
