@@ -1,33 +1,27 @@
 package com.example.wizardworld.domain.model
-import kotlinx.serialization.Serializable
 
-@Serializable
-data class Wand(
-    val wood: String?,
-    val core: String?,
-    val length: Double?,
-)
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class HpCharacter(
     val id: String,
     val name: String,
-    val alternateNames: List<String>,
-    val species: String?,
-    val gender: String?,
-    val house: String?,
-    val dateOfBirth: String?,
-    val yearOfBirth: Int?,
-    val isWizard: Boolean,
-    val ancestry: String?,
-    val eyeColour: String?,
-    val hairColour: String?,
-    val wand: Wand?,
-    val patronus: String?,
-    val isHogwartsStudent: Boolean,
-    val isHogwartsStaff: Boolean,
-    val actor: String?,
-    val alternateActors: List<String>,
-    val isAlive: Boolean,
-    val imageUrl: String?,
+    val alternateNames: List<String> = emptyList(),
+    val species: String? = null,
+    val gender: String? = null,
+    val house: String? = null,
+    val dateOfBirth: String? = null,
+    val yearOfBirth: Int? = null,
+    val isWizard: Boolean = true,
+    val ancestry: String? = null,
+    val eyeColour: String? = null,
+    val hairColour: String? = null,
+    val wands: List<String> = emptyList(),
+    val patronus: String? = null,
+    val isHogwartsStudent: Boolean = false,
+    val isHogwartsStaff: Boolean = false,
+    val actor: String? = null,
+    val alternateActors: List<String> = emptyList(),
+    val isAlive: Boolean = true,
+    val imageUrl: String? = null,
 )

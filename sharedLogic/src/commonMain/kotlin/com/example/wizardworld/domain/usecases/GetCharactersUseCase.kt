@@ -1,12 +1,21 @@
 package com.example.wizardworld.domain.usecases
 
 import com.example.wizardworld.core.Resource
-import com.example.wizardworld.domain.model.HpCharacter
+import com.example.wizardworld.domain.model.HpCharacterPage
 import com.example.wizardworld.domain.repository.CharacterRepository
 import kotlinx.coroutines.flow.Flow
 
 class GetCharactersUseCase(
     private val repository: CharacterRepository,
 ) {
-    operator fun invoke(): Flow<Resource<List<HpCharacter>>> = repository.getCharacters()
+    operator fun invoke(
+        nameQuery: String? = null,
+        pageNumber: Int? = null,
+        pageSize: Int? = null,
+    ): Flow<Resource<HpCharacterPage>> =
+        repository.getCharacters(
+            nameQuery = nameQuery,
+            pageNumber = pageNumber,
+            pageSize = pageSize,
+        )
 }
