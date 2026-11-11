@@ -1,13 +1,13 @@
 package com.example.wizardworld.data.repository
 
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import com.example.wizardworld.core.Resource
 import com.example.wizardworld.data.local.HouseLocalDataSource
 import com.example.wizardworld.data.local.createWizardWorldDatabase
 import com.example.wizardworld.data.remote.wizardWorldJson
 import com.example.wizardworld.db.WizardWorldDatabase
 import com.example.wizardworld.domain.model.House
 import com.example.wizardworld.domain.model.HouseListItem
-import com.example.wizardworld.domain.model.NetworkResult
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockRequestHandleScope
@@ -33,7 +33,7 @@ class HouseRepositoryCacheTest {
 
             val result = repository.getHouses()
 
-            val success = assertIs<NetworkResult.Success<List<HouseListItem>>>(result)
+            val success = assertIs<Resource.Success<List<HouseListItem>>>(result)
             assertEquals(
                 listOf("Gryffindor", "Slytherin"),
                 success.data.map { it.name },
@@ -56,11 +56,11 @@ class HouseRepositoryCacheTest {
                     },
                 )
 
-            assertIs<NetworkResult.Success<*>>(repository.getHouses())
+            assertIs<Resource.Success<*>>(repository.getHouses())
             isOnline = false
 
             val result = repository.getHouses()
-            val offline = assertIs<NetworkResult.Offline<List<HouseListItem>>>(result)
+            val offline = assertIs<Resource.Offline<List<HouseListItem>>>(result)
             assertEquals(
                 listOf("Gryffindor", "Slytherin"),
                 offline.data.map { it.name },
@@ -76,7 +76,7 @@ class HouseRepositoryCacheTest {
 
             val result = repository.getHouses()
 
-            assertIs<NetworkResult.Error>(result)
+            assertIs<Resource.Error>(result)
         }
     }
 
@@ -95,11 +95,11 @@ class HouseRepositoryCacheTest {
                     },
                 )
 
-            assertIs<NetworkResult.Success<*>>(repository.getHouses())
+            assertIs<Resource.Success<*>>(repository.getHouses())
             isOnline = false
 
             val result = repository.getHouse("0367baf3-1cb6-4baf-bede-48e17e1cd005")
-            val offline = assertIs<NetworkResult.Offline<House>>(result)
+            val offline = assertIs<Resource.Offline<House>>(result)
             assertEquals("Gryffindor", offline.data.name)
             assertTrue(offline.data.traits.any { it.name == "Bravery" })
         }

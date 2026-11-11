@@ -15,10 +15,12 @@ import com.example.wizardworld.domain.repository.CharacterRepository
 import com.example.wizardworld.domain.repository.HouseRepository
 import com.example.wizardworld.domain.usecases.GetCharacterDetailUseCase
 import com.example.wizardworld.domain.usecases.GetCharactersUseCase
-import com.example.wizardworld.presentation.HouseDetailViewModel
-import com.example.wizardworld.presentation.HouseListViewModel
+import com.example.wizardworld.domain.usecases.GetHouseUseCase
+import com.example.wizardworld.domain.usecases.GetHousesUseCase
 import com.example.wizardworld.presentation.characters.CharacterDetailViewModel
 import com.example.wizardworld.presentation.characters.CharacterListViewModel
+import com.example.wizardworld.presentation.houses.HouseDetailViewModel
+import com.example.wizardworld.presentation.houses.HouseListViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
@@ -47,14 +49,18 @@ val sharedModule =
         }
         singleOf(::CharacterLocalDataSource)
         singleOf(::CharacterRepositoryImpl) bind CharacterRepository::class
+
+        factoryOf(::GetHousesUseCase)
+        factoryOf(::GetHouseUseCase)
         factoryOf(::GetCharactersUseCase)
         factoryOf(::GetCharacterDetailUseCase)
+
         viewModelOf(::HouseListViewModel)
         singleOf(::HpCharacterLocalDataSource)
         viewModel { parameters ->
             HouseDetailViewModel(
                 houseId = parameters.get(),
-                houseRepository = get(),
+                getHouseUseCase = get(),
             )
         }
         viewModelOf(::CharacterListViewModel)

@@ -3,6 +3,7 @@ package com.example.wizardworld.data.repository
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.example.wizardworld.core.Resource
 import com.example.wizardworld.data.local.CharacterLocalDataSource
+import com.example.wizardworld.data.local.HpCharacterLocalDataSource
 import com.example.wizardworld.data.local.createWizardWorldDatabase
 import com.example.wizardworld.data.remote.HpApi
 import com.example.wizardworld.data.remote.WizardWorldApi
@@ -131,7 +132,7 @@ private fun createRepository(engine: MockEngine): CharacterRepositoryImpl {
         )
     val database = createWizardWorldDatabase(driver)
     val localDataSource = CharacterLocalDataSource(database)
-    val hpLocalDataSource = com.example.wizardworld.data.local.HpCharacterLocalDataSource(database)
+    val hpLocalDataSource = HpCharacterLocalDataSource(database)
     val httpClient =
         HttpClient(engine) {
             expectSuccess = true
@@ -139,6 +140,7 @@ private fun createRepository(engine: MockEngine): CharacterRepositoryImpl {
                 json(wizardWorldJson)
             }
         }
+
     return CharacterRepositoryImpl(
         hpApi = HpApi(httpClient),
         wizardWorldApi = WizardWorldApi(httpClient),
