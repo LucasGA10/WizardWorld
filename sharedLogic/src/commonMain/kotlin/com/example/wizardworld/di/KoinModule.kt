@@ -10,15 +10,21 @@ import com.example.wizardworld.data.remote.WizardWorldApi
 import com.example.wizardworld.data.remote.provideHpHttpClient
 import com.example.wizardworld.data.remote.provideWizardWorldHttpClient
 import com.example.wizardworld.data.repository.CharacterRepositoryImpl
+import com.example.wizardworld.data.repository.FavoriteRepositoryImpl
 import com.example.wizardworld.data.repository.HouseRepositoryImpl
 import com.example.wizardworld.domain.repository.CharacterRepository
+import com.example.wizardworld.domain.repository.FavoriteRepository
 import com.example.wizardworld.domain.repository.HouseRepository
 import com.example.wizardworld.domain.usecases.GetCharacterDetailUseCase
 import com.example.wizardworld.domain.usecases.GetCharactersUseCase
 import com.example.wizardworld.domain.usecases.GetHouseUseCase
 import com.example.wizardworld.domain.usecases.GetHousesUseCase
+import com.example.wizardworld.domain.usecases.ObserveFavoriteCharactersUseCase
+import com.example.wizardworld.domain.usecases.ObserveFavoriteIdsUseCase
+import com.example.wizardworld.domain.usecases.ToggleFavoriteUseCase
 import com.example.wizardworld.presentation.characters.CharacterDetailViewModel
 import com.example.wizardworld.presentation.characters.CharacterListViewModel
+import com.example.wizardworld.presentation.characters.FavoritesViewModel
 import com.example.wizardworld.presentation.houses.HouseDetailViewModel
 import com.example.wizardworld.presentation.houses.HouseListViewModel
 import org.koin.core.module.dsl.factoryOf
@@ -49,14 +55,19 @@ val sharedModule =
         }
         singleOf(::CharacterLocalDataSource)
         singleOf(::CharacterRepositoryImpl) bind CharacterRepository::class
+        singleOf(::FavoriteRepositoryImpl) bind FavoriteRepository::class
 
         factoryOf(::GetHousesUseCase)
         factoryOf(::GetHouseUseCase)
         factoryOf(::GetCharactersUseCase)
         factoryOf(::GetCharacterDetailUseCase)
+        factoryOf(::ToggleFavoriteUseCase)
+        factoryOf(::ObserveFavoriteCharactersUseCase)
+        factoryOf(::ObserveFavoriteIdsUseCase)
 
         viewModelOf(::HouseListViewModel)
         singleOf(::HpCharacterLocalDataSource)
+        viewModelOf(::FavoritesViewModel)
         viewModel { parameters ->
             HouseDetailViewModel(
                 houseId = parameters.get(),
@@ -69,6 +80,8 @@ val sharedModule =
             CharacterDetailViewModel(
                 characterId = parameters.get(),
                 getCharacterDetailUseCase = get(),
+                toggleFavoriteUseCase = get(),
+                observeFavoriteIdsUseCase = get(),
             )
         }
     }

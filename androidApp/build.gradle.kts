@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtimeCompose)
     implementation(libs.compose.material3)
     implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.koin.androidx.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.coil.compose)
