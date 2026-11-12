@@ -58,11 +58,12 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.ktor.client.mock)
+            implementation(libs.kotlinx.coroutines.test)
         }
         named("androidHostTest") {
             dependencies {
                 implementation(libs.sqldelight.sqlite.driver)
-                implementation(libs.ktor.client.mock)
             }
         }
     }
