@@ -7,6 +7,7 @@ import com.example.wizardworld.domain.usecases.ObserveFavoriteCharactersUseCase
 import com.example.wizardworld.presentation.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class FavoritesViewModel(
@@ -17,14 +18,19 @@ class FavoritesViewModel(
 
     init {
         viewModelScope.launch {
-            observeFavoriteCharactersUseCase().collect { characters ->
-                _state.value =
-                    if (characters.isEmpty()) {
-                        UiState.Empty
-                    } else {
-                        UiState.Success(characters, isOffline = false)
-                    }
-            }
+            observeFavoriteCharactersUseCase()
+                .catch { exception ->
+                    _state.value = UiState.Error(exception.message ?: FAVORITES_ERROR_MESSAGE)
+                }.collect { characters ->
+                    _state.value =
+                        if (characters.isEmpty()) {
+                            UiState.Empty
+                        } else {
+                            UiState.Success(characters, isOffline = false)
+                        }
+                }
         }
     }
 }
+
+private const val FAVORITES_ERROR_MESSAGE = "No se pudieron cargar los favoritos."
