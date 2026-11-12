@@ -108,6 +108,10 @@ class CharacterRepositoryImpl(
 
             emit(result)
         }
+
+    override fun observeCachedCharacters(): Flow<List<HpCharacter>> {
+        return hpLocalDataSource.observeCharacters()
+    }
 }
 
 private const val DEFAULT_ERROR_MESSAGE = "No se a podido encontrar a los magos."

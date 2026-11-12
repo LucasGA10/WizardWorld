@@ -71,4 +71,6 @@ private class FakeCharacterRepository(
 
     override fun getCharacter(id: String): Flow<Resource<HpCharacter>> =
         flowOf(Resource.Error("Character details are not configured in this fake."))
+
+    override fun observeCachedCharacters(): Flow<List<HpCharacter>> = flowOf(emptyList())
 }

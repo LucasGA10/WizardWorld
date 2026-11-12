@@ -11,11 +11,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -38,6 +47,7 @@ import com.example.wizardworld.ui.screens.characters.components.CharacterItemCar
 import com.example.wizardworld.ui.screens.characters.components.CharacterListLoading
 import org.koin.androidx.compose.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterListScreen(
     onCharacterClick: (String) -> Unit,
@@ -75,6 +85,32 @@ fun CharacterListScreen(
                 ),
             modifier = Modifier.shadow(elevation = 4.dp),
         )
+
+        SearchBar(
+            inputField = {
+                SearchBarDefaults.InputField(
+                    query = state.nameQuery.orEmpty(),
+                    onQueryChange = viewModel::onNameQueryChange,
+                    onSearch = {},
+                    expanded = false,
+                    onExpandedChange = {},
+                    placeholder = { Text(text = stringResource(R.string.search_characters)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = stringResource(R.string.search_characters_cd),
+                        )
+                    },
+                )
+            },
+            expanded = false,
+            onExpandedChange = {},
+            windowInsets = WindowInsets(0, 0, 0, 0),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+        ) {}
 
         AnimatedContent(
             targetState = state.currentState,

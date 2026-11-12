@@ -9,6 +9,10 @@ SELECT *
 FROM hpCharacterEntity
 WHERE id = ?;
 
+selectAllHpCharacters:
+SELECT *
+FROM hpCharacterEntity;
+
 insertHpCharacter:
 INSERT OR REPLACE INTO hpCharacterEntity(
     id,
