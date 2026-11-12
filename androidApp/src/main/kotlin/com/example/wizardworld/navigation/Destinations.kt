@@ -8,6 +8,9 @@ object Destinations {
     data object HouseListRoute
 
     @Serializable
+    data object FavoritesRoute
+
+    @Serializable
     data class HouseDetailRoute(
         val houseId: String,
     )

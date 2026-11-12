@@ -16,4 +16,6 @@ interface CharacterRepository {
     ): Flow<Resource<HpCharacterPage>>
 
     fun getCharacter(id: String): Flow<Resource<HpCharacter>>
+
+    fun observeCachedCharacters(): Flow<List<HpCharacter>>
 }

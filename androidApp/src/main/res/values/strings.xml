@@ -4,6 +4,8 @@
     <string name="houses_title">Casas de Hogwarts</string>
     <string name="search_houses">Buscar por nombre</string>
     <string name="search_houses_cd">Buscar casas</string>
+    <string name="search_characters">Buscar personaje por nombre</string>
+    <string name="search_characters_cd">Buscar personajes</string>
     <string name="offline_banner">You are viewing cached data. Some information may be out of date.</string>
     <string name="empty_houses_title">No houses to display</string>
     <string name="empty_houses_message">The Great Hall is quiet. Pull to refresh or try another search.</string>
@@ -26,12 +28,17 @@
     <string name="character_list_title">Wizards</string>
     <string name="nav_houses">Casas</string>
     <string name="nav_characters">Personajes</string>
+    <string name="nav_favorites">Favoritos</string>
+    <string name="empty_favorites_title">Todavía no agregaste favoritos</string>
+    <string name="empty_favorites_message">Los personajes que marques como favoritos aparecerán aquí.</string>
 
     <!-- Detalle de personajes -->
     <string name="character_detail_title">Detalle del personaje</string>
     <string name="character_detail_back">Volver</string>
     <string name="character_detail_not_found">Personaje no encontrado</string>
     <string name="character_detail_not_found_message">No se encontró información de este personaje.</string>
+    <string name="add_character_favorite">Añadir a favoritos</string>
+    <string name="remove_character_favorite">Quitar de favoritos</string>
 
     <!-- Atributos -->
     <string name="character_detail_house">Casa</string>

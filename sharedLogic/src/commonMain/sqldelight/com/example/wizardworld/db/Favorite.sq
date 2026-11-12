@@ -1,0 +1,22 @@
+CREATE TABLE favoriteCharacterEntity (
+    characterId TEXT NOT NULL PRIMARY KEY
+);
+
+insertFavorite:
+INSERT OR IGNORE INTO favoriteCharacterEntity(characterId)
+VALUES (?);
+
+deleteFavorite:
+DELETE FROM favoriteCharacterEntity
+WHERE characterId = ?;
+
+selectAllFavoriteIds:
+SELECT characterId
+FROM favoriteCharacterEntity;
+
+isFavorite:
+SELECT EXISTS(
+    SELECT 1
+    FROM favoriteCharacterEntity
+    WHERE characterId = ?
+) AS isFavorite;

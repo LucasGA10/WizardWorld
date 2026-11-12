@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -79,6 +81,32 @@ fun CharacterDetailScreen(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription =
                                 stringResource(R.string.character_detail_back),
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = viewModel::toggleFavorite) {
+                        Icon(
+                            imageVector =
+                                if (state.isFavorite) {
+                                    Icons.Filled.Favorite
+                                } else {
+                                    Icons.Outlined.FavoriteBorder
+                                },
+                            contentDescription =
+                                stringResource(
+                                    if (state.isFavorite) {
+                                        R.string.remove_character_favorite
+                                    } else {
+                                        R.string.add_character_favorite
+                                    },
+                                ),
+                            tint =
+                                if (state.isFavorite) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                },
                         )
                     }
                 },

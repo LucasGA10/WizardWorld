@@ -4,11 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
@@ -30,12 +30,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.wizardworld.navigation.Destinations
-import com.example.wizardworld.ui.screens.characters.CharacterListScreen
-import com.example.wizardworld.ui.screens.houses.HouseDetailScreen
 import com.example.wizardworld.ui.screens.characters.CharacterDetailScreen
+import com.example.wizardworld.ui.screens.characters.CharacterListScreen
+import com.example.wizardworld.ui.screens.characters.FavoritesScreen
+import com.example.wizardworld.ui.screens.houses.HouseDetailScreen
 import com.example.wizardworld.ui.screens.houses.HouseListScreen
 import com.example.wizardworld.ui.theme.WizardWorldTheme
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,10 +61,13 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
     val isCharactersSelected =
         destination?.hasRoute<Destinations.CharacterListRoute>() == true
 
+    val isFavoritesSelected =
+        destination?.hasRoute<Destinations.FavoritesRoute>() == true
+
     Scaffold(
-        contentWindowInsets = WindowInsets(0,0,0,0),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
-            if (isHousesSelected || isCharactersSelected) {
+            if (isHousesSelected || isCharactersSelected || isFavoritesSelected) {
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surface,
                 ) {
@@ -81,7 +84,7 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
                         },
                         icon = {
                             Icon(
-                                imageVector = Icons.Default.Person,
+                                imageVector = Icons.Filled.Person,
                                 contentDescription = stringResource(R.string.nav_characters),
                             )
                         },
@@ -108,11 +111,38 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
                         },
                         icon = {
                             Icon(
-                                imageVector = Icons.Default.Home,
+                                imageVector = Icons.Filled.Home,
                                 contentDescription = stringResource(R.string.nav_houses),
                             )
                         },
                         label = { Text(stringResource(R.string.nav_houses)) },
+                        colors =
+                            NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                    )
+                    NavigationBarItem(
+                        selected = isFavoritesSelected,
+                        onClick = {
+                            navController.navigate(Destinations.FavoritesRoute) {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.Favorite,
+                                contentDescription = stringResource(R.string.nav_favorites),
+                            )
+                        },
+                        label = { Text(stringResource(R.string.nav_favorites)) },
                         colors =
                             NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
@@ -164,6 +194,14 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
                     },
                 )
             }
+
+            composable<Destinations.FavoritesRoute> {
+                FavoritesScreen(
+                    onCharacterClick = { characterId ->
+                        navController.navigate(Destinations.CharacterDetailRoute(characterId))
+                    },
+                )
+            }
             
             composable<Destinations.CharacterDetailRoute> { backStackEntry ->
                 val route =
@@ -176,7 +214,6 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
                     },
                 )
             }
-
         }
     }
 }
