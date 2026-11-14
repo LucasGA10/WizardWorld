@@ -14,10 +14,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.wizardworld.R
+import org.jetbrains.compose.resources.stringResource
+import wizardworld.sharedui.generated.resources.Res
+import wizardworld.sharedui.generated.resources.error_title
+import wizardworld.sharedui.generated.resources.retry
 
 @Composable
 fun ErrorState(
@@ -40,7 +42,7 @@ fun ErrorState(
             tint = MaterialTheme.colorScheme.error,
         )
         Text(
-            text = stringResource(R.string.error_title),
+            text = stringResource(Res.string.error_title),
             style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 16.dp),
@@ -53,7 +55,7 @@ fun ErrorState(
             modifier = Modifier.padding(top = 8.dp, bottom = 20.dp),
         )
         Button(onClick = onRetry) {
-            Text(text = stringResource(R.string.retry))
+            Text(text = stringResource(Res.string.retry))
         }
     }
 }

@@ -8,6 +8,15 @@ plugins {
 }
 
 kotlin {
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64(),
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "SharedUI"
+            isStatic = true
+        }
+    }
 
     android {
         namespace = "com.example.wizardworld.sharedUI"
@@ -38,13 +47,22 @@ kotlin {
         commonMain.dependencies {
             api(project(":sharedLogic"))
             implementation(libs.compose.runtime)
+            implementation(libs.compose.animation)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
+            implementation(libs.compose.material.icons.extended)
             implementation(libs.compose.ui)
             implementation(libs.compose.components.resources)
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.coil.compose)
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.koin.core)
+        }
+        iosMain.dependencies {
+            implementation(libs.coil.network.ktor3)
+            implementation(libs.ktor.client.darwin)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
