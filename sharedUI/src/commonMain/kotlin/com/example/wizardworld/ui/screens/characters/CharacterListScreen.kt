@@ -5,7 +5,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,30 +29,36 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.example.wizardworld.R
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.wizardworld.presentation.UiState
 import com.example.wizardworld.presentation.characters.CharacterListViewModel
+import com.example.wizardworld.ui.components.AppLogo
 import com.example.wizardworld.ui.components.EmptyState
 import com.example.wizardworld.ui.components.ErrorState
 import com.example.wizardworld.ui.screens.characters.components.CharacterItemCard
 import com.example.wizardworld.ui.screens.characters.components.CharacterListLoading
-import org.koin.androidx.compose.koinViewModel
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
+import wizardworld.sharedui.generated.resources.Res
+import wizardworld.sharedui.generated.resources.app_logo_cd
+import wizardworld.sharedui.generated.resources.character_list_title
+import wizardworld.sharedui.generated.resources.empty_characters_message
+import wizardworld.sharedui.generated.resources.empty_characters_title
+import wizardworld.sharedui.generated.resources.search_characters
+import wizardworld.sharedui.generated.resources.search_characters_cd
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterListScreen(
     onCharacterClick: (String) -> Unit,
-    viewModel: CharacterListViewModel = koinViewModel(),
 ) {
-    val state by viewModel.state.collectAsState()
+    val viewModel: CharacterListViewModel = koinViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.loadCharacters()
@@ -71,12 +76,10 @@ fun CharacterListScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_app_logo),
-                        contentDescription = stringResource(R.string.app_logo_cd),
-                        modifier = Modifier.size(40.dp),
+                    AppLogo(
+                        contentDescription = stringResource(Res.string.app_logo_cd),
                     )
-                    Text(text = stringResource(R.string.character_list_title))
+                    Text(text = stringResource(Res.string.character_list_title))
                 }
             },
             colors =
@@ -94,11 +97,11 @@ fun CharacterListScreen(
                     onSearch = {},
                     expanded = false,
                     onExpandedChange = {},
-                    placeholder = { Text(text = stringResource(R.string.search_characters)) },
+                    placeholder = { Text(text = stringResource(Res.string.search_characters)) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Filled.Search,
-                            contentDescription = stringResource(R.string.search_characters_cd),
+                            contentDescription = stringResource(Res.string.search_characters_cd),
                         )
                     },
                 )
@@ -153,8 +156,8 @@ fun CharacterListScreen(
 
                 UiState.Empty -> {
                     EmptyState(
-                        title = "Magos no encontrados",
-                        message = "No se encontraron magos en la lista",
+                        title = stringResource(Res.string.empty_characters_title),
+                        message = stringResource(Res.string.empty_characters_message),
                     )
                 }
             }
