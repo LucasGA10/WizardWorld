@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_logo_cd">WizardWorld emblem</string>
+    <string name="character_list_title">Wizards</string>
+    <string name="search_characters">Buscar personaje por nombre</string>
+    <string name="search_characters_cd">Buscar personajes</string>
+    <string name="empty_characters_title">Magos no encontrados</string>
+    <string name="empty_characters_message">No se encontraron magos en la lista</string>
+    <string name="error_title">A charm went wrong</string>
+    <string name="retry">Try again</string>
+</resources>
