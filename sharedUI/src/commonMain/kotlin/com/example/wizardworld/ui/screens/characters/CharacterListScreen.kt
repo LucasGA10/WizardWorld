@@ -1,10 +1,5 @@
 package com.example.wizardworld.ui.screens.characters
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,7 +43,9 @@ import com.example.wizardworld.ui.components.EmptyState
 import com.example.wizardworld.ui.components.ErrorState
 import com.example.wizardworld.ui.screens.characters.components.CharacterItemCard
 import com.example.wizardworld.ui.screens.characters.components.CharacterListLoading
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import wizardworld.sharedui.generated.resources.Res
@@ -67,7 +64,6 @@ fun CharacterListScreen(onCharacterClick: (String) -> Unit) {
     val viewModel: CharacterListViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val gridState = rememberLazyGridState()
-    val currentCharacters = (state.currentState as? UiState.Success)?.data.orEmpty()
     val hasNextPage =
         state.paginationMeta?.let { metadata ->
             metadata.hasNextPage &&
@@ -82,20 +78,32 @@ fun CharacterListScreen(onCharacterClick: (String) -> Unit) {
         gridState.scrollToItem(0)
     }
 
-    LaunchedEffect(
-        currentCharacters.size,
-        state.isLoadingMore,
-        state.paginationError,
-        state.paginationMeta,
-    ) {
-        if (currentCharacters.isEmpty()) return@LaunchedEffect
-
-        snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1 }
-            .collect { lastVisibleIndex ->
+    LaunchedEffect(gridState) {
+        combine(
+            snapshotFlow {
+                gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+            },
+            viewModel.state,
+        ) { lastVisibleIndex, listState ->
+            val metadata = listState.paginationMeta
+            PaginationTrigger(
+                lastVisibleIndex = lastVisibleIndex,
+                characterCount = (listState.currentState as? UiState.Success)?.data?.size ?: 0,
+                hasNextPage =
+                    metadata?.let {
+                        it.hasNextPage && it.nextPage?.let { nextPage -> nextPage > it.currentPage } == true
+                    } == true,
+                isLoadingMore = listState.isLoadingMore,
+                paginationError = listState.paginationError,
+            )
+        }.distinctUntilChanged()
+            .collect { trigger ->
+                val prefetchIndex = (trigger.characterCount - PREFETCH_ITEM_COUNT).coerceAtLeast(0)
                 if (
-                    lastVisibleIndex >= currentCharacters.lastIndex &&
-                    !state.isLoadingMore &&
-                    state.paginationError == null
+                    trigger.hasNextPage &&
+                    trigger.lastVisibleIndex >= prefetchIndex &&
+                    !trigger.isLoadingMore &&
+                    trigger.paginationError == null
                 ) {
                     viewModel.loadNextPage()
                 }
@@ -153,21 +161,14 @@ fun CharacterListScreen(onCharacterClick: (String) -> Unit) {
                     .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {}
 
-        AnimatedContent(
-            targetState = state.currentState,
-            transitionSpec = {
-                fadeIn(animationSpec = tween(300)) togetherWith
-                    fadeOut(animationSpec = tween(300))
-            },
-            modifier = Modifier.weight(1f),
-        ) { targetState ->
-            when (targetState) {
+        Box(modifier = Modifier.weight(1f)) {
+            when (val currentState = state.currentState) {
                 UiState.Loading -> {
                     CharacterListLoading()
                 }
 
                 is UiState.Success -> {
-                    if (targetState.data.isNotEmpty()) {
+                    if (currentState.data.isNotEmpty()) {
                         LazyVerticalGrid(
                             state = gridState,
                             columns = GridCells.Fixed(2),
@@ -175,11 +176,14 @@ fun CharacterListScreen(onCharacterClick: (String) -> Unit) {
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
                             contentPadding = PaddingValues(16.dp),
                         ) {
-                            items(targetState.data.size) { index ->
+                            items(
+                                count = currentState.data.size,
+                                key = { index -> currentState.data[index].id },
+                            ) { index ->
                                 CharacterItemCard(
-                                    character = targetState.data[index],
+                                    character = currentState.data[index],
                                     onClick = {
-                                        onCharacterClick(targetState.data[index].id)
+                                        onCharacterClick(currentState.data[index].id)
                                     },
                                 )
                             }
@@ -238,7 +242,7 @@ fun CharacterListScreen(onCharacterClick: (String) -> Unit) {
 
                 is UiState.Error -> {
                     ErrorState(
-                        message = targetState.message,
+                        message = currentState.message,
                         onRetry = viewModel::loadCharacters,
                     )
                 }
@@ -253,3 +257,13 @@ fun CharacterListScreen(onCharacterClick: (String) -> Unit) {
         }
     }
 }
+
+private const val PREFETCH_ITEM_COUNT = 4
+
+private data class PaginationTrigger(
+    val lastVisibleIndex: Int,
+    val characterCount: Int,
+    val hasNextPage: Boolean,
+    val isLoadingMore: Boolean,
+    val paginationError: String?,
+)
