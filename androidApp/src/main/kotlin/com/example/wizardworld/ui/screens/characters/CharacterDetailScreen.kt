@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -32,22 +30,16 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.example.wizardworld.R
 import com.example.wizardworld.domain.model.HpCharacter
 import com.example.wizardworld.presentation.UiState
 import com.example.wizardworld.presentation.characters.CharacterDetailViewModel
+import com.example.wizardworld.ui.components.CharacterImage
 import com.example.wizardworld.ui.components.EmptyState
 import com.example.wizardworld.ui.components.ErrorState
 import com.example.wizardworld.ui.components.LoadingState
@@ -180,7 +172,11 @@ private fun CharacterDetailContent(character: HpCharacter) {
                 .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        CharacterImage(character)
+        CharacterImage(
+            character = character,
+            imageHeight = 260.dp,
+            placeholderSize = 150.dp,
+        )
 
         Text(
             text = character.name,
@@ -279,64 +275,6 @@ private fun CharacterDetailContent(character: HpCharacter) {
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-    }
-}
-
-@Composable
-private fun CharacterImage(character: HpCharacter) {
-    var imageError by remember(character.imageUrl) {
-        mutableStateOf(character.imageUrl.isNullOrBlank())
-    }
-
-    val initials =
-        character.name
-            .trim()
-            .split(Regex("\\s+"))
-            .filter { it.isNotBlank() }
-            .take(2)
-            .mapNotNull { it.firstOrNull()?.uppercaseChar() }
-            .joinToString("")
-            .ifBlank { "?" }
-
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(260.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (imageError) {
-            Box(
-                modifier =
-                    Modifier
-                        .size(150.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = initials,
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    textAlign = TextAlign.Center,
-                )
-            }
-        } else {
-            AsyncImage(
-                model = character.imageUrl,
-                contentDescription = character.name,
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.TopCenter,
-                onError = {
-                    imageError = true
-                },
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(260.dp),
-            )
-        }
     }
 }
 

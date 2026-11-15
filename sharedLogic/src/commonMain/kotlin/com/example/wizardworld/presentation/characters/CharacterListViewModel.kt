@@ -17,6 +17,8 @@ data class CharacterListState(
     val currentState: UiState<List<HpCharacter>> = UiState.Loading,
     val paginationMeta: PaginationMeta? = null,
     val nameQuery: String? = null,
+    val isLoadingMore: Boolean = false,
+    val paginationError: String? = null,
 )
 
 class CharacterListViewModel(
@@ -34,54 +36,132 @@ class CharacterListViewModel(
     fun loadCharacters(forceRefresh: Boolean = false) {
         if (!forceRefresh && _state.value.currentState is UiState.Success) return
 
+        loadPage(pageNumber = 1, replaceCharacters = true)
+    }
+
+    fun loadNextPage() {
+        val currentState = _state.value
+        val nextPage =
+            currentState.paginationMeta
+                ?.takeIf { it.hasNextPage && it.nextPage != null && it.nextPage > it.currentPage }
+                ?.nextPage ?: return
+        if (currentState.isLoadingMore || currentState.currentState !is UiState.Success) return
+
+        loadPage(pageNumber = nextPage, replaceCharacters = false)
+    }
+
+    private fun loadPage(
+        pageNumber: Int,
+        replaceCharacters: Boolean,
+    ) {
         loadJob?.cancel()
         val query = _state.value.nameQuery
+        _state.update { currentState ->
+            if (replaceCharacters) {
+                currentState.copy(
+                    currentState = UiState.Loading,
+                    paginationMeta = null,
+                    isLoadingMore = false,
+                    paginationError = null,
+                )
+            } else {
+                currentState.copy(isLoadingMore = true, paginationError = null)
+            }
+        }
         loadJob =
             viewModelScope.launch {
-                val characters = getCharactersUseCase(nameQuery = query)
+                val characters =
+                    getCharactersUseCase(
+                        nameQuery = query,
+                        pageNumber = pageNumber,
+                        pageSize = PAGE_SIZE,
+                    )
                 characters.collect { result ->
                     _state.update { currentState ->
                         when (result) {
                             is Resource.Success -> {
-                                currentState.copy(
-                                    currentState =
-                                        if (result.data.characters.isEmpty()) {
-                                            UiState.Empty
-                                        } else {
-                                            UiState.Success(
-                                                result.data.characters,
-                                                isOffline = false,
-                                            )
-                                        },
+                                currentState.withPageResult(
+                                    characters = result.data.characters,
                                     paginationMeta = result.data.paginationMeta,
+                                    replaceCharacters = replaceCharacters,
+                                    isOffline = false,
                                 )
                             }
 
                             is Resource.Offline -> {
-                                currentState.copy(
-                                    currentState =
-                                        if (result.data.characters.isEmpty()) {
-                                            UiState.Empty
-                                        } else {
-                                            UiState.Success(
-                                                result.data.characters,
-                                                isOffline = true,
-                                            )
-                                        },
+                                currentState.withPageResult(
+                                    characters = result.data.characters,
                                     paginationMeta = result.data.paginationMeta,
+                                    replaceCharacters = replaceCharacters,
+                                    isOffline = true,
                                 )
                             }
 
                             is Resource.Error -> {
-                                currentState.copy(currentState = UiState.Error(message = result.message))
+                                if (replaceCharacters) {
+                                    currentState.copy(
+                                        currentState = UiState.Error(message = result.message),
+                                        isLoadingMore = false,
+                                        paginationError = null,
+                                    )
+                                } else {
+                                    currentState.copy(
+                                        isLoadingMore = false,
+                                        paginationError = result.message,
+                                    )
+                                }
                             }
 
                             Resource.Loading -> {
-                                currentState.copy(currentState = UiState.Loading)
+                                if (replaceCharacters) {
+                                    currentState.copy(currentState = UiState.Loading)
+                                } else {
+                                    currentState.copy(isLoadingMore = true)
+                                }
                             }
                         }
                     }
                 }
             }
+    }
+
+    private fun CharacterListState.withPageResult(
+        characters: List<HpCharacter>,
+        paginationMeta: PaginationMeta?,
+        replaceCharacters: Boolean,
+        isOffline: Boolean,
+    ): CharacterListState {
+        val existingCharacters =
+            if (replaceCharacters) {
+                emptyList()
+            } else {
+                (currentState as? UiState.Success)?.data.orEmpty()
+            }
+        val updatedCharacters =
+            (existingCharacters + characters).distinctBy(HpCharacter::id)
+
+        return copy(
+            currentState =
+                if (updatedCharacters.isEmpty()) {
+                    UiState.Empty
+                } else {
+                    UiState.Success(
+                        data = updatedCharacters,
+                        isOffline =
+                            if (replaceCharacters) {
+                                isOffline
+                            } else {
+                                (currentState as? UiState.Success)?.isOffline == true || isOffline
+                            },
+                    )
+                },
+            paginationMeta = paginationMeta,
+            isLoadingMore = false,
+            paginationError = null,
+        )
+    }
+
+    private companion object {
+        const val PAGE_SIZE = 10
     }
 }
