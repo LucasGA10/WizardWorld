@@ -27,6 +27,24 @@ class HpCharacterDeserializationTest {
         assertEquals("Stag", harry.patronus)
         assertTrue(harry.isWizard)
     }
+
+    @Test
+    fun hpCharacterJson_mapsListAttributesToDomain() {
+        val response =
+            wizardWorldJson.decodeFromString(
+                PotterDbResponse.serializer(ListSerializer(HpCharacterDto.serializer())),
+                POTTER_DB_CHARACTERS_JSON,
+            )
+
+        val harry = response.data.first().toDomain()
+
+        assertEquals(listOf("The Boy Who Lived", "The Chosen One"), harry.alternateNames)
+        assertEquals(listOf("11\", Holly, phoenix feather"), harry.wands)
+        assertEquals(listOf("James Potter", "Lily Potter"), harry.familyMembers)
+        assertEquals(listOf("Auror", "Head of Auror Office"), harry.jobs)
+        assertEquals(listOf("Ginevra Weasley"), harry.romances)
+        assertEquals(listOf("Triwizard Champion"), harry.titles)
+    }
 }
 
 private const val POTTER_DB_CHARACTERS_JSON = """
@@ -37,7 +55,7 @@ private const val POTTER_DB_CHARACTERS_JSON = """
       "type": "character",
       "attributes": {
         "name": "Harry Potter",
-        "alias_names": ["The Boy Who Lived"],
+        "alias_names": ["The Boy Who Lived", "The Chosen One"],
         "species": "Human",
         "gender": "Male",
         "house": "Gryffindor",
@@ -46,6 +64,10 @@ private const val POTTER_DB_CHARACTERS_JSON = """
         "eye_color": "Green",
         "hair_color": "Black",
         "wands": ["11\", Holly, phoenix feather"],
+        "family_members": ["James Potter", "Lily Potter"],
+        "jobs": ["Auror", "Head of Auror Office"],
+        "romances": ["Ginevra Weasley"],
+        "titles": ["Triwizard Champion"],
         "patronus": "Stag",
         "image": "https://res.cloudinary.com/dt2gfv2pt/image/upload/v1672325338/harry_potter.jpg"
       }
