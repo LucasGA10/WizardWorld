@@ -44,8 +44,8 @@ import com.example.wizardworld.ui.components.ErrorState
 import com.example.wizardworld.ui.components.OfflineBanner
 import com.example.wizardworld.ui.screens.characters.components.CharacterItemCard
 import com.example.wizardworld.ui.screens.characters.components.CharacterListLoading
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
