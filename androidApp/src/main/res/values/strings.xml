@@ -46,10 +46,16 @@
     <string name="character_detail_birth">Nacimiento</string>
     <string name="character_detail_patronus">Patronus</string>
     <string name="character_detail_status">Estado</string>
-    <string name="character_detail_actor">Actor / Actriz</string>
     <string name="character_detail_wand">Varita mágica</string>
     <string name="character_detail_wood">Madera</string>
     <string name="character_detail_core">Núcleo</string>
+    <string name="character_detail_animagus">Animago</string>
+    <string name="character_detail_boggart">Boggart</string>
+    <string name="character_detail_titles">Títulos</string>
+    <string name="character_detail_jobs">Trabajos</string>
+    <string name="character_detail_family_members">Familiares</string>
+    <string name="character_detail_romances">Romances</string>
+    <string name="character_detail_open_wiki">Ver en la Wiki de Harry Potter</string>
 
     <!-- Valores -->
     <string name="character_detail_unknown_masculine">Desconocido</string>

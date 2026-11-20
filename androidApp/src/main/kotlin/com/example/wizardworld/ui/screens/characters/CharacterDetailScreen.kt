@@ -1,6 +1,10 @@
 
 package com.example.wizardworld.ui.screens.characters
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,12 +21,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -32,6 +35,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -42,8 +46,9 @@ import com.example.wizardworld.presentation.characters.CharacterDetailViewModel
 import com.example.wizardworld.ui.components.CharacterImage
 import com.example.wizardworld.ui.components.EmptyState
 import com.example.wizardworld.ui.components.ErrorState
-import com.example.wizardworld.ui.components.LoadingState
 import com.example.wizardworld.ui.components.OfflineBanner
+import com.example.wizardworld.ui.screens.characters.components.CharacterAttributeCard
+import com.example.wizardworld.ui.screens.characters.components.CharacterDetailLoading
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -116,41 +121,47 @@ fun CharacterDetailScreen(
                     .padding(innerPadding)
                     .background(MaterialTheme.colorScheme.background),
         ) {
-            when (val currentState = state.currentState) {
-                UiState.Loading -> {
-                    LoadingState()
-                }
+            AnimatedContent(
+                targetState = state.currentState,
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label = "characterDetailState",
+            ) { currentState ->
+                when (currentState) {
+                    UiState.Loading -> {
+                        CharacterDetailLoading()
+                    }
 
-                is UiState.Success -> {
-                    Column {
-                        OfflineBanner(
-                            visible = currentState.isOffline,
-                        )
+                    is UiState.Success -> {
+                        Column {
+                            OfflineBanner(
+                                visible = currentState.isOffline,
+                            )
 
-                        CharacterDetailContent(
-                            character = currentState.data,
+                            CharacterDetailContent(
+                                character = currentState.data,
+                            )
+                        }
+                    }
+
+                    is UiState.Error -> {
+                        ErrorState(
+                            message = currentState.message,
+                            onRetry = viewModel::loadCharacter,
                         )
                     }
-                }
 
-                is UiState.Error -> {
-                    ErrorState(
-                        message = currentState.message,
-                        onRetry = viewModel::loadCharacter,
-                    )
-                }
-
-                UiState.Empty -> {
-                    EmptyState(
-                        title =
-                            stringResource(
-                                R.string.character_detail_not_found,
-                            ),
-                        message =
-                            stringResource(
-                                R.string.character_detail_not_found_message,
-                            ),
-                    )
+                    UiState.Empty -> {
+                        EmptyState(
+                            title =
+                                stringResource(
+                                    R.string.character_detail_not_found,
+                                ),
+                            message =
+                                stringResource(
+                                    R.string.character_detail_not_found_message,
+                                ),
+                        )
+                    }
                 }
             }
         }
@@ -163,6 +174,7 @@ private fun CharacterDetailContent(character: HpCharacter) {
         stringResource(R.string.character_detail_unknown_masculine)
     val unknownFeminine =
         stringResource(R.string.character_detail_unknown_feminine)
+    val uriHandler = LocalUriHandler.current
 
     Column(
         modifier =
@@ -251,12 +263,55 @@ private fun CharacterDetailContent(character: HpCharacter) {
             )
         }
 
-        CharacterAttributeCard(
-            title = stringResource(R.string.character_detail_actor),
-            value = character.actor.orEmpty().ifBlank {
-                unknownMasculine
-            },
-            modifier = Modifier.fillMaxWidth(),
+        CharacterAttributesRow(
+            first =
+                character.animagus
+                    ?.takeIf(String::isNotBlank)
+                    ?.let {
+                        stringResource(R.string.character_detail_animagus) to it
+                    },
+            second =
+                character.boggart
+                    ?.takeIf(String::isNotBlank)
+                    ?.let {
+                        stringResource(R.string.character_detail_boggart) to it
+                    },
+        )
+
+        CharacterAttributesRow(
+            first =
+                character.titles
+                    .filter(String::isNotBlank)
+                    .takeIf(List<String>::isNotEmpty)
+                    ?.let {
+                        stringResource(R.string.character_detail_titles) to it.joinToString("\n")
+                    },
+            second =
+                character.jobs
+                    .filter(String::isNotBlank)
+                    .takeIf(List<String>::isNotEmpty)
+                    ?.let {
+                        stringResource(R.string.character_detail_jobs) to it.joinToString("\n")
+                    },
+        )
+
+        CharacterAttributesRow(
+            first =
+                character.familyMembers
+                    .filter(String::isNotBlank)
+                    .takeIf(List<String>::isNotEmpty)
+                    ?.let {
+                        stringResource(R.string.character_detail_family_members) to
+                            it.joinToString("\n")
+                    },
+            second =
+                character.romances
+                    .filter(String::isNotBlank)
+                    .takeIf(List<String>::isNotEmpty)
+                    ?.let {
+                        stringResource(R.string.character_detail_romances) to
+                            it.joinToString("\n")
+                    },
         )
 
         if (character.wands.isNotEmpty()) {
@@ -274,42 +329,55 @@ private fun CharacterDetailContent(character: HpCharacter) {
             }
         }
 
+        character.wikiUrl
+            ?.takeIf(String::isNotBlank)
+            ?.let { wikiUrl ->
+                OutlinedButton(
+                    onClick = { uriHandler.openUri(wikiUrl) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(text = stringResource(R.string.character_detail_open_wiki))
+                }
+            }
+
         Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
 @Composable
-private fun CharacterAttributeCard(
-    title: String,
-    value: String,
-    modifier: Modifier = Modifier,
+private fun CharacterAttributesRow(
+    first: Pair<String, String>?,
+    second: Pair<String, String>?,
 ) {
-    Card(
-        modifier = modifier,
-        colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            ),
-        elevation =
-            CardDefaults.cardElevation(
-                defaultElevation = 3.dp,
-            ),
-    ) {
-        Column(
-            modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary,
-            )
+    if (first == null && second == null) return
 
-            Text(
-                text = value,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface,
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        first?.let { (title, value) ->
+            CharacterAttributeCard(
+                title = title,
+                value = value,
+                modifier =
+                    if (second == null) {
+                        Modifier.fillMaxWidth()
+                    } else {
+                        Modifier.weight(1f)
+                    },
+            )
+        }
+
+        second?.let { (title, value) ->
+            CharacterAttributeCard(
+                title = title,
+                value = value,
+                modifier =
+                    if (first == null) {
+                        Modifier.fillMaxWidth()
+                    } else {
+                        Modifier.weight(1f)
+                    },
             )
         }
     }
