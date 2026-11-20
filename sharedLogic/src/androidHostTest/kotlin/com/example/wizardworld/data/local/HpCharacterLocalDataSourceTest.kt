@@ -57,6 +57,27 @@ class HpCharacterLocalDataSourceTest {
             assertEquals(character, dataSource.getCharacter("1"))
         }
     }
+
+    @Test
+    fun replaceCharacters_upsertsAndKeepsPreviouslyCachedCharacters() {
+        runBlocking {
+            val dataSource = HpCharacterLocalDataSource(createDatabase())
+            val harry = HpCharacter(id = "1", name = "Harry Potter")
+            dataSource.saveCharacter(harry)
+
+            dataSource.replaceCharacters(
+                listOf(
+                    HpCharacter(id = "1", name = "Harry James Potter"),
+                    HpCharacter(id = "2", name = "Hermione Granger"),
+                ),
+            )
+
+            assertEquals(
+                mapOf("1" to "Harry James Potter", "2" to "Hermione Granger"),
+                dataSource.getAllCharacters().associate { it.id to it.name },
+            )
+        }
+    }
 }
 
 private fun createDatabase(): WizardWorldDatabase =

@@ -7,6 +7,7 @@
     <string name="empty_characters_message">No se encontraron magos en la lista</string>
     <string name="pagination_load_more">Cargar más</string>
     <string name="pagination_retry">Reintentar</string>
+    <string name="offline_banner">You are viewing cached data. Some information may be out of date.</string>
     <string name="error_title">A charm went wrong</string>
     <string name="retry">Try again</string>
 </resources>

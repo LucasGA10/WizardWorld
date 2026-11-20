@@ -14,6 +14,7 @@ import kotlinx.serialization.SerializationException
 class HpCharacterLocalDataSource(
     database: WizardWorldDatabase,
 ) {
+    private val database = database
     private val queries = database.hpCharacterQueries
 
     fun observeCharacters(): Flow<List<HpCharacter>> =
@@ -22,12 +23,25 @@ class HpCharacterLocalDataSource(
             .mapToList(Dispatchers.Default)
             .map { characters -> characters.mapNotNull { decodeOrNull(it.json) } }
 
+    suspend fun getAllCharacters(): List<HpCharacter> =
+        withContext(Dispatchers.Default) {
+            queries.selectAllHpCharacters()
+                .executeAsList()
+                .mapNotNull { decodeOrNull(it.json) }
+        }
+
     suspend fun saveCharacter(character: HpCharacter) {
         withContext(Dispatchers.Default) {
-            queries.insertHpCharacter(
-                id = character.id,
-                json = wizardWorldJson.encodeToString(HpCharacter.serializer(), character),
-            )
+            insertCharacter(character)
+        }
+    }
+
+    // Upserts each page's characters while preserving other previously cached pages.
+    suspend fun replaceCharacters(characters: List<HpCharacter>) {
+        withContext(Dispatchers.Default) {
+            database.transaction {
+                characters.forEach(::insertCharacter)
+            }
         }
     }
 
@@ -38,6 +52,13 @@ class HpCharacterLocalDataSource(
                 ?.json
                 ?.let(::decodeOrNull)
         }
+
+    private fun insertCharacter(character: HpCharacter) {
+        queries.insertHpCharacter(
+            id = character.id,
+            json = wizardWorldJson.encodeToString(HpCharacter.serializer(), character),
+        )
+    }
 
     // Las filas guardadas con una versión anterior de HpCharacter (p. ej. el campo "wand" de la HP-API)
     // se ignoran en lugar de romper la app.

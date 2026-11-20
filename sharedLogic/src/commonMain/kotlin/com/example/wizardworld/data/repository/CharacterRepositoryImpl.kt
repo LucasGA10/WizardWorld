@@ -63,13 +63,22 @@ class CharacterRepositoryImpl(
                             characters = response.data.map { it.toDomain() },
                             paginationMeta = response.meta.toDomain(),
                         )
+                    hpLocalDataSource.replaceCharacters(data.characters)
                     Resource.Success(data)
                 } catch (exception: CancellationException) {
                     throw exception
                 } catch (exception: Exception) {
-                    when (exception) {
-                        is IOException -> Resource.Error(CONNECTION_ERROR_MESSAGE)
-                        else -> Resource.Error(exception.message ?: DEFAULT_ERROR_MESSAGE)
+                    val cached = hpLocalDataSource.getAllCharacters()
+                    if (cached.isNotEmpty()) {
+                        Resource.Offline(
+                            data = HpCharacterPage(characters = cached),
+                            message = exception.message ?: DEFAULT_ERROR_MESSAGE,
+                        )
+                    } else {
+                        when (exception) {
+                            is IOException -> Resource.Error(CONNECTION_ERROR_MESSAGE)
+                            else -> Resource.Error(exception.message ?: DEFAULT_ERROR_MESSAGE)
+                        }
                     }
                 }
             emit(result)

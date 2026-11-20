@@ -14,9 +14,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.example.wizardworld.R
+import org.jetbrains.compose.resources.stringResource
+import wizardworld.sharedui.generated.resources.Res
+import wizardworld.sharedui.generated.resources.offline_banner
 
 @Composable
 fun OfflineBanner(
@@ -39,7 +40,7 @@ fun OfflineBanner(
                     contentDescription = null,
                 )
                 Text(
-                    text = stringResource(R.string.offline_banner),
+                    text = stringResource(Res.string.offline_banner),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }

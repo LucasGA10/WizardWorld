@@ -31,14 +31,18 @@ class CharacterRepositoryTest {
     @Test
     fun getCharacters_whenApiReturns200_emitsLoadingThenSuccessWithPage() =
         runTest {
-            val repository = createFixture(MockEngine { respondJson(POTTER_DB_CHARACTERS_PAGE_JSON) }).repository
+            val fixture = createFixture(MockEngine { respondJson(POTTER_DB_CHARACTERS_PAGE_JSON) })
 
-            val results = repository.getCharacters().toList()
+            val results = fixture.repository.getCharacters().toList()
 
             assertEquals(2, results.size)
             assertEquals(Resource.Loading, results.first())
             val page = assertIs<Resource.Success<HpCharacterPage>>(results.last()).data
             assertEquals(listOf("Harry Potter", "Hermione Granger"), page.characters.map { it.name })
+            assertEquals(
+                page.characters.associate { it.id to it.name },
+                fixture.hpLocalDataSource.getAllCharacters().associate { it.id to it.name },
+            )
             assertEquals("Stag", page.characters.first().patronus)
             val meta = assertNotNull(page.paginationMeta)
             assertEquals(1, meta.currentPage)
@@ -71,7 +75,23 @@ class CharacterRepositoryTest {
         }
 
     @Test
-    fun getCharacters_whenNoConnection_emitsConnectionError() =
+    fun getCharacters_whenNoConnectionWithCache_emitsOffline() =
+        runTest {
+            val fixture = createFixture(MockEngine { throw IOException("Network unreachable") })
+            fixture.hpLocalDataSource.replaceCharacters(
+                listOf(HpCharacter(id = HARRY_ID, name = "Harry Potter")),
+            )
+
+            val results = fixture.repository.getCharacters().toList()
+
+            assertEquals(Resource.Loading, results.first())
+            val offline = assertIs<Resource.Offline<HpCharacterPage>>(results.last())
+            assertEquals(listOf("Harry Potter"), offline.data.characters.map { it.name })
+            assertEquals(null, offline.data.paginationMeta)
+        }
+
+    @Test
+    fun getCharacters_whenNoConnectionWithoutCache_emitsConnectionError() =
         runTest {
             val repository = createFixture(MockEngine { throw IOException("Network unreachable") }).repository
 

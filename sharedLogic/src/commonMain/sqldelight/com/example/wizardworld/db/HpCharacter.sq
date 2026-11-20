@@ -13,6 +13,9 @@ selectAllHpCharacters:
 SELECT *
 FROM hpCharacterEntity;
 
+deleteAllHpCharacters:
+DELETE FROM hpCharacterEntity;
+
 insertHpCharacter:
 INSERT OR REPLACE INTO hpCharacterEntity(
     id,
