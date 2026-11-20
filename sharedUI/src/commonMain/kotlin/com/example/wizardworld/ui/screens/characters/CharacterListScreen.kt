@@ -41,6 +41,7 @@ import com.example.wizardworld.presentation.characters.CharacterListViewModel
 import com.example.wizardworld.ui.components.AppLogo
 import com.example.wizardworld.ui.components.EmptyState
 import com.example.wizardworld.ui.components.ErrorState
+import com.example.wizardworld.ui.components.OfflineBanner
 import com.example.wizardworld.ui.screens.characters.components.CharacterItemCard
 import com.example.wizardworld.ui.screens.characters.components.CharacterListLoading
 import kotlinx.coroutines.flow.combine
@@ -134,6 +135,8 @@ fun CharacterListScreen(onCharacterClick: (String) -> Unit) {
                 ),
             modifier = Modifier.shadow(elevation = 4.dp),
         )
+
+        OfflineBanner(visible = (state.currentState as? UiState.Success)?.isOffline == true)
 
         SearchBar(
             inputField = {

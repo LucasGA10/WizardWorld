@@ -6,7 +6,6 @@
     <string name="search_houses_cd">Buscar casas</string>
     <string name="search_characters">Buscar personaje por nombre</string>
     <string name="search_characters_cd">Buscar personajes</string>
-    <string name="offline_banner">You are viewing cached data. Some information may be out of date.</string>
     <string name="empty_houses_title">No houses to display</string>
     <string name="empty_houses_message">The Great Hall is quiet. Pull to refresh or try another search.</string>
     <string name="empty_house_detail_title">Casa no encontrada</string>
