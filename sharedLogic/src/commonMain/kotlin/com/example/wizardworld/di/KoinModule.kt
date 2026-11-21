@@ -10,9 +10,11 @@ import com.example.wizardworld.data.remote.WizardWorldApi
 import com.example.wizardworld.data.remote.provideHpHttpClient
 import com.example.wizardworld.data.remote.provideWizardWorldHttpClient
 import com.example.wizardworld.data.repository.CharacterRepositoryImpl
+import com.example.wizardworld.data.repository.ElixirRepositoryImpl
 import com.example.wizardworld.data.repository.FavoriteRepositoryImpl
 import com.example.wizardworld.data.repository.HouseRepositoryImpl
 import com.example.wizardworld.domain.repository.CharacterRepository
+import com.example.wizardworld.domain.repository.ElixirRepository
 import com.example.wizardworld.domain.repository.FavoriteRepository
 import com.example.wizardworld.domain.repository.HouseRepository
 import com.example.wizardworld.domain.usecases.GetCharacterDetailUseCase
@@ -56,6 +58,7 @@ val sharedModule =
         singleOf(::CharacterLocalDataSource)
         singleOf(::CharacterRepositoryImpl) bind CharacterRepository::class
         singleOf(::FavoriteRepositoryImpl) bind FavoriteRepository::class
+        singleOf(::ElixirRepositoryImpl) bind ElixirRepository::class
 
         factoryOf(::GetHousesUseCase)
         factoryOf(::GetHouseUseCase)
