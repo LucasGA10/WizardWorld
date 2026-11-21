@@ -113,36 +113,6 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
                     )
 
                     NavigationBarItem(
-                        selected = isHousesSelected,
-                        onClick = {
-                            navController.navigate(Destinations.HouseListRoute) {
-                                popUpTo(navController.graph.startDestinationId) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Filled.Home,
-                                contentDescription = stringResource(R.string.nav_houses),
-                            )
-                        },
-                        label = {
-                            Text(stringResource(R.string.nav_houses))
-                        },
-                        colors =
-                            NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                indicatorColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            ),
-                    )
-
-                    NavigationBarItem(
                         selected = isFavoritesSelected,
                         onClick = {
                             navController.navigate(Destinations.FavoritesRoute) {
@@ -161,6 +131,36 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
                         },
                         label = {
                             Text(stringResource(R.string.nav_favorites))
+                        },
+                        colors =
+                            NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                    )
+
+                    NavigationBarItem(
+                        selected = isHousesSelected,
+                        onClick = {
+                            navController.navigate(Destinations.HouseListRoute) {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.Home,
+                                contentDescription = stringResource(R.string.nav_houses),
+                            )
+                        },
+                        label = {
+                            Text(stringResource(R.string.nav_houses))
                         },
                         colors =
                             NavigationBarItemDefaults.colors(
