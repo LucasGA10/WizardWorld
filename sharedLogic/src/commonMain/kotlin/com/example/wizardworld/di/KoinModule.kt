@@ -1,6 +1,7 @@
 package com.example.wizardworld.di
 
 import com.example.wizardworld.data.local.CharacterLocalDataSource
+import com.example.wizardworld.data.local.ElixirLocalDataSource
 import com.example.wizardworld.data.local.HouseLocalDataSource
 import com.example.wizardworld.data.local.HpCharacterLocalDataSource
 import com.example.wizardworld.data.local.createWizardWorldDatabase
@@ -59,6 +60,7 @@ val sharedModule =
         singleOf(::CharacterRepositoryImpl) bind CharacterRepository::class
         singleOf(::FavoriteRepositoryImpl) bind FavoriteRepository::class
         singleOf(::ElixirRepositoryImpl) bind ElixirRepository::class
+        singleOf(::ElixirLocalDataSource)
 
         factoryOf(::GetHousesUseCase)
         factoryOf(::GetHouseUseCase)

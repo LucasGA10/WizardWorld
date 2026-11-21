@@ -2,9 +2,12 @@
 package com.example.wizardworld.data.repository
 
 import com.example.wizardworld.core.Resource
+import com.example.wizardworld.data.local.ElixirLocalDataSource
 import com.example.wizardworld.data.remote.WIZARD_WORLD_API_BASE_URL
 import com.example.wizardworld.data.remote.WizardWorldApi
+import com.example.wizardworld.domain.model.Elixir
 import com.example.wizardworld.testutil.createMockHttpClient
+import com.example.wizardworld.testutil.createTestDatabase
 import com.example.wizardworld.testutil.respondJson
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respondError
@@ -14,71 +17,57 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ElixirRepositoryTest {
     @Test
     fun getElixirs_emitsLoadingThenSuccess() =
         runTest {
-            val repository =
-                createRepository(
-                    MockEngine {
-                        respondJson(ELIXIRS_JSON)
-                    },
-                )
+            val fixture =
+                createFixture(MockEngine { respondJson(ELIXIRS_JSON) })
 
-            val emissions = repository.getElixirs().toList()
+            val results = fixture.repository.getElixirs().toList()
 
-            assertEquals(2, emissions.size)
-            assertEquals(Resource.Loading, emissions[0])
-
+            assertEquals(Resource.Loading, results.first())
             val success =
-                assertIs<Resource.Success<*>>(emissions[1])
+                assertIs<Resource.Success<List<Elixir>>>(results.last())
 
-            val elixirs =
-                success.data as List<*>
-
-            assertEquals(2, elixirs.size)
+            assertEquals(2, success.data.size)
+            assertEquals("Polyjuice Potion", success.data[0].name)
+            assertEquals("Felix Felicis", success.data[1].name)
         }
 
     @Test
-    fun getElixirs_mapsApiDataToDomain() =
+    fun getElixirs_savesResultsInCache() =
         runTest {
-            val repository =
-                createRepository(
-                    MockEngine {
-                        respondJson(ELIXIRS_JSON)
-                    },
-                )
+            val fixture =
+                createFixture(MockEngine { respondJson(ELIXIRS_JSON) })
 
-            val emissions = repository.getElixirs().toList()
-            val result = emissions.last()
+            fixture.repository.getElixirs().toList()
 
-            assertIs<Resource.Success<*>>(result)
+            val cached = fixture.localDataSource.getAllElixirs()
 
-            val elixirs =
-                (result as Resource.Success).data
-
-            assertEquals("Polyjuice Potion", elixirs[0].name)
-            assertEquals("Advanced", elixirs[0].difficulty)
-            assertEquals("Felix Felicis", elixirs[1].name)
+            assertEquals(2, cached.size)
+            assertEquals(
+                setOf("e1", "e2"),
+                cached.map { it.id }.toSet(),
+            )
         }
 
     @Test
     fun getElixirs_withEmptyResponse_emitsSuccessWithEmptyList() =
         runTest {
-            val repository =
-                createRepository(
-                    MockEngine {
-                        respondJson("[]")
-                    },
-                )
+            val fixture =
+                createFixture(MockEngine { respondJson("[]") })
 
-            val emissions = repository.getElixirs().toList()
-            val result = emissions.last()
+            val results = fixture.repository.getElixirs().toList()
 
-            assertIs<Resource.Success<*>>(result)
-            assertTrue((result as Resource.Success).data.isEmpty())
+            val success =
+                assertIs<Resource.Success<List<Elixir>>>(results.last())
+
+            assertTrue(success.data.isEmpty())
         }
 
     @Test
@@ -86,8 +75,8 @@ class ElixirRepositoryTest {
         runTest {
             val parameters = mutableMapOf<String, String?>()
 
-            val repository =
-                createRepository(
+            val fixture =
+                createFixture(
                     MockEngine { request ->
                         listOf(
                             "name",
@@ -96,15 +85,14 @@ class ElixirRepositoryTest {
                             "inventorFullName",
                             "manufacturer",
                         ).forEach { key ->
-                            parameters[key] =
-                                request.url.parameters[key]
+                            parameters[key] = request.url.parameters[key]
                         }
 
                         respondJson("[]")
                     },
                 )
 
-            repository.getElixirs(
+            fixture.repository.getElixirs(
                 name = "Polyjuice",
                 difficulty = "Advanced",
                 ingredient = "Fluxweed",
@@ -123,89 +111,246 @@ class ElixirRepositoryTest {
         }
 
     @Test
-    fun getElixir_emitsLoadingThenSuccess() =
+    fun getElixirs_filteredSearchPreservesExistingCache() =
         runTest {
-            val repository =
-                createRepository(
+            var filteredSearch = false
+
+            val fixture =
+                createFixture(
                     MockEngine {
-                        respondJson(ELIXIR_JSON)
+                        if (filteredSearch) {
+                            respondJson(FILTERED_ELIXIRS_JSON)
+                        } else {
+                            respondJson(ELIXIRS_JSON)
+                        }
                     },
                 )
 
-            val emissions = repository.getElixir("e1").toList()
+            fixture.repository.getElixirs().toList()
 
-            assertEquals(2, emissions.size)
-            assertEquals(Resource.Loading, emissions[0])
+            filteredSearch = true
+            fixture.repository.getElixirs(name = "Polyjuice").toList()
 
-            val result = emissions.last()
-            assertIs<Resource.Success<*>>(result)
+            val cached = fixture.localDataSource.getAllElixirs()
 
-            val elixir = (result as Resource.Success).data
-
-            assertEquals("e1", elixir.id)
-            assertEquals("Polyjuice Potion", elixir.name)
-            assertEquals("Fluxweed", elixir.ingredients[0].name)
-            assertEquals("Hermione", elixir.inventors[0].firstName)
+            assertEquals(2, cached.size)
+            assertEquals(
+                setOf("e1", "e2"),
+                cached.map { it.id }.toSet(),
+            )
         }
 
     @Test
-    fun getElixirs_whenServerFails_emitsError() =
+    fun getElixirs_whenOfflineWithCache_emitsOffline() =
         runTest {
-            val repository =
-                createRepository(
+            var online = true
+
+            val fixture =
+                createFixture(
+                    MockEngine {
+                        if (online) {
+                            respondJson(ELIXIRS_JSON)
+                        } else {
+                            respondError(HttpStatusCode.InternalServerError)
+                        }
+                    },
+                )
+
+            fixture.repository.getElixirs().toList()
+            online = false
+
+            val results = fixture.repository.getElixirs().toList()
+
+            assertEquals(Resource.Loading, results.first())
+
+            val offline =
+                assertIs<Resource.Offline<List<Elixir>>>(results.last())
+
+            assertEquals(2, offline.data.size)
+            assertEquals("Polyjuice Potion", offline.data[0].name)
+        }
+
+    @Test
+    fun getElixirs_whenOfflineWithFilters_returnsMatchingCache() =
+        runTest {
+            var online = true
+
+            val fixture =
+                createFixture(
+                    MockEngine {
+                        if (online) {
+                            respondJson(ELIXIRS_JSON)
+                        } else {
+                            respondError(HttpStatusCode.InternalServerError)
+                        }
+                    },
+                )
+
+            fixture.repository.getElixirs().toList()
+            online = false
+
+            val results =
+                fixture.repository.getElixirs(
+                    name = "Polyjuice",
+                ).toList()
+
+            val offline =
+                assertIs<Resource.Offline<List<Elixir>>>(results.last())
+
+            assertEquals(1, offline.data.size)
+            assertEquals("e1", offline.data.first().id)
+        }
+
+    @Test
+    fun getElixirs_whenOfflineWithoutCache_emitsError() =
+        runTest {
+            val fixture =
+                createFixture(
                     MockEngine {
                         respondError(HttpStatusCode.InternalServerError)
                     },
                 )
 
-            val emissions = repository.getElixirs().toList()
+            val results = fixture.repository.getElixirs().toList()
 
-            assertEquals(Resource.Loading, emissions.first())
-            assertIs<Resource.Error>(emissions.last())
+            assertEquals(Resource.Loading, results.first())
+            assertIs<Resource.Error>(results.last())
         }
 
     @Test
-    fun getElixir_whenServerFails_emitsError() =
+    fun getElixir_emitsSuccessAndSavesInCache() =
         runTest {
-            val repository =
-                createRepository(
+            val fixture =
+                createFixture(MockEngine { respondJson(ELIXIR_JSON) })
+
+            val results = fixture.repository.getElixir("e1").toList()
+
+            assertEquals(Resource.Loading, results.first())
+
+            val success =
+                assertIs<Resource.Success<Elixir>>(results.last())
+
+            assertEquals("Polyjuice Potion", success.data.name)
+            assertEquals("Fluxweed", success.data.ingredients[0].name)
+
+            val cached = fixture.localDataSource.getElixir("e1")
+
+            assertNotNull(cached)
+            assertEquals(success.data, cached)
+        }
+
+    @Test
+    fun getElixir_whenOfflineWithCache_emitsOffline() =
+        runTest {
+            var online = true
+
+            val fixture =
+                createFixture(
+                    MockEngine {
+                        if (online) {
+                            respondJson(ELIXIR_JSON)
+                        } else {
+                            respondError(HttpStatusCode.InternalServerError)
+                        }
+                    },
+                )
+
+            fixture.repository.getElixir("e1").toList()
+            online = false
+
+            val results = fixture.repository.getElixir("e1").toList()
+
+            assertEquals(Resource.Loading, results.first())
+
+            val offline =
+                assertIs<Resource.Offline<Elixir>>(results.last())
+
+            assertEquals("e1", offline.data.id)
+            assertEquals("Polyjuice Potion", offline.data.name)
+        }
+
+    @Test
+    fun getElixir_whenOfflineWithoutCache_emitsError() =
+        runTest {
+            val fixture =
+                createFixture(
                     MockEngine {
                         respondError(HttpStatusCode.InternalServerError)
                     },
                 )
 
-            val emissions = repository.getElixir("e1").toList()
+            val results = fixture.repository.getElixir("e1").toList()
 
-            assertEquals(Resource.Loading, emissions.first())
-            assertIs<Resource.Error>(emissions.last())
+            assertEquals(Resource.Loading, results.first())
+            assertIs<Resource.Error>(results.last())
         }
 
     @Test
     fun getElixir_whenNotFound_emitsError() =
         runTest {
-            val repository =
-                createRepository(
+            val fixture =
+                createFixture(
                     MockEngine {
                         respondError(HttpStatusCode.NotFound)
                     },
                 )
 
-            val emissions = repository.getElixir("unknown").toList()
+            val results = fixture.repository.getElixir("unknown").toList()
 
-            assertEquals(Resource.Loading, emissions.first())
-            assertIs<Resource.Error>(emissions.last())
+            assertIs<Resource.Error>(results.last())
+        }
+
+    @Test
+    fun getElixirs_newFullResponseReplacesOldCache() =
+        runTest {
+            var useNewResponse = false
+
+            val fixture =
+                createFixture(
+                    MockEngine {
+                        if (useNewResponse) {
+                            respondJson(FILTERED_ELIXIRS_JSON)
+                        } else {
+                            respondJson(ELIXIRS_JSON)
+                        }
+                    },
+                )
+
+            fixture.repository.getElixirs().toList()
+            useNewResponse = true
+            fixture.repository.getElixirs().toList()
+
+            val cached = fixture.localDataSource.getAllElixirs()
+
+            assertEquals(1, cached.size)
+            assertEquals("e1", cached.first().id)
+            assertNull(fixture.localDataSource.getElixir("e2"))
         }
 }
 
-private fun createRepository(engine: MockEngine): ElixirRepositoryImpl =
-    ElixirRepositoryImpl(
-        WizardWorldApi(
-            createMockHttpClient(
-                engine,
-                WIZARD_WORLD_API_BASE_URL,
-            ),
-        ),
-    )
+private class ElixirFixture(
+    val repository: ElixirRepositoryImpl,
+    val localDataSource: ElixirLocalDataSource,
+)
+
+private fun createFixture(engine: MockEngine): ElixirFixture {
+    val database = createTestDatabase()
+    val localDataSource = ElixirLocalDataSource(database)
+
+    val repository =
+        ElixirRepositoryImpl(
+            api =
+                WizardWorldApi(
+                    createMockHttpClient(
+                        engine,
+                        WIZARD_WORLD_API_BASE_URL,
+                    ),
+                ),
+            localDataSource = localDataSource,
+        )
+
+    return ElixirFixture(repository, localDataSource)
+}
 
 private const val ELIXIRS_JSON = """
 [
@@ -213,12 +358,32 @@ private const val ELIXIRS_JSON = """
     "id": "e1",
     "name": "Polyjuice Potion",
     "difficulty": "Advanced",
-    "ingredients": [],
-    "inventors": []
+    "ingredients": [
+      { "id": "i1", "name": "Fluxweed" }
+    ],
+    "inventors": [
+      {
+        "id": "w1",
+        "firstName": "Hermione",
+        "lastName": "Granger"
+      }
+    ]
   },
   {
     "id": "e2",
     "name": "Felix Felicis",
+    "difficulty": "Advanced",
+    "ingredients": [],
+    "inventors": []
+  }
+]
+"""
+
+private const val FILTERED_ELIXIRS_JSON = """
+[
+  {
+    "id": "e1",
+    "name": "Polyjuice Potion",
     "difficulty": "Advanced",
     "ingredients": [],
     "inventors": []
@@ -233,10 +398,7 @@ private const val ELIXIR_JSON = """
   "effect": "Changes appearance",
   "difficulty": "Advanced",
   "ingredients": [
-    {
-      "id": "i1",
-      "name": "Fluxweed"
-    }
+    { "id": "i1", "name": "Fluxweed" }
   ],
   "inventors": [
     {

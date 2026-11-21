@@ -1,0 +1,23 @@
+
+CREATE TABLE elixirEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    json TEXT NOT NULL
+);
+
+selectAllElixirs:
+SELECT *
+FROM elixirEntity;
+
+selectElixirById:
+SELECT *
+FROM elixirEntity
+WHERE id = ?;
+
+insertElixir:
+INSERT OR REPLACE INTO elixirEntity (
+    id,
+    json
+) VALUES (?, ?);
+
+deleteAllElixirs:
+DELETE FROM elixirEntity;
