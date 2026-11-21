@@ -24,6 +24,7 @@ import com.example.wizardworld.presentation.UiState
 import com.example.wizardworld.presentation.characters.FavoritesViewModel
 import com.example.wizardworld.ui.components.EmptyState
 import com.example.wizardworld.ui.components.LoadingState
+import com.example.wizardworld.ui.components.WizardTopBar
 import com.example.wizardworld.ui.screens.characters.components.CharacterItemCard
 import org.koin.androidx.compose.koinViewModel
 
@@ -35,12 +36,9 @@ fun FavoritesScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text(text = stringResource(R.string.nav_favorites)) },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ),
+        WizardTopBar(
+            title = stringResource(R.string.nav_favorites),
+            appLogoDescription = ""
         )
 
         when (val currentState = state) {

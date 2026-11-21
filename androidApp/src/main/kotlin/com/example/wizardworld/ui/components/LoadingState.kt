@@ -60,6 +60,10 @@ fun LoadingState(modifier: Modifier = Modifier) {
         repeat(3) {
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
+                colors =
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    ),
                 elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
             ) {
                 Column(
