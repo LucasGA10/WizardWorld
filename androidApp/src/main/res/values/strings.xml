@@ -1,3 +1,66 @@
 <resources>
     <string name="app_name">WizardWorld</string>
+    <string name="app_logo_cd">WizardWorld emblem</string>
+    <string name="houses_title">Casas de Hogwarts</string>
+    <string name="search_houses">Buscar por nombre</string>
+    <string name="search_houses_cd">Buscar casas</string>
+    <string name="search_characters">Buscar personaje por nombre</string>
+    <string name="search_characters_cd">Buscar personajes</string>
+    <string name="empty_houses_title">No houses to display</string>
+    <string name="empty_houses_message">The Great Hall is quiet. Pull to refresh or try another search.</string>
+    <string name="empty_house_detail_title">Casa no encontrada</string>
+    <string name="empty_house_detail_message">This house could not be loaded from the archive.</string>
+    <string name="error_title">A charm went wrong</string>
+    <string name="retry">Try again</string>
+    <string name="navigate_back">Back</string>
+    <string name="house_details">House details</string>
+    <string name="attribute_founder">Founder</string>
+    <string name="attribute_animal">Animal</string>
+    <string name="attribute_colours">Colours</string>
+    <string name="attribute_ghost">Ghost</string>
+    <string name="attribute_element">Element</string>
+    <string name="attribute_common_room">Common room</string>
+    <string name="heads_title">Heads of House</string>
+    <string name="traits_title">Traits</string>
+    <string name="house_animal_label">Animal: %1$s</string>
+    <string name="house_founder_label">Founded by %1$s</string>
+    <string name="character_list_title">Wizards</string>
+    <string name="nav_houses">Casas</string>
+    <string name="nav_characters">Personajes</string>
+    <string name="nav_favorites">Favoritos</string>
+    <string name="empty_favorites_title">Todavía no agregaste favoritos</string>
+    <string name="empty_favorites_message">Los personajes que marques como favoritos aparecerán aquí.</string>
+
+    <!-- Detalle de personajes -->
+    <string name="character_detail_title">Detalle del personaje</string>
+    <string name="character_detail_back">Volver</string>
+    <string name="character_detail_not_found">Personaje no encontrado</string>
+    <string name="character_detail_not_found_message">No se encontró información de este personaje.</string>
+    <string name="add_character_favorite">Añadir a favoritos</string>
+    <string name="remove_character_favorite">Quitar de favoritos</string>
+
+    <!-- Atributos -->
+    <string name="character_detail_house">Casa</string>
+    <string name="character_detail_species">Especie</string>
+    <string name="character_detail_gender">Género</string>
+    <string name="character_detail_birth">Nacimiento</string>
+    <string name="character_detail_patronus">Patronus</string>
+    <string name="character_detail_status">Estado</string>
+    <string name="character_detail_wand">Varita mágica</string>
+    <string name="character_detail_wood">Madera</string>
+    <string name="character_detail_core">Núcleo</string>
+    <string name="character_detail_animagus">Animago</string>
+    <string name="character_detail_boggart">Boggart</string>
+    <string name="character_detail_titles">Títulos</string>
+    <string name="character_detail_jobs">Trabajos</string>
+    <string name="character_detail_family_members">Familiares</string>
+    <string name="character_detail_romances">Romances</string>
+    <string name="character_detail_open_wiki">Ver en la Wiki de Harry Potter</string>
+
+    <!-- Valores -->
+    <string name="character_detail_unknown_masculine">Desconocido</string>
+    <string name="character_detail_unknown_feminine">Desconocida</string>
+    <string name="character_detail_alive">Vivo</string>
+    <string name="character_detail_deceased">Fallecido</string>
+    <string name="nav_elixirs">Elixires</string>
 </resources>

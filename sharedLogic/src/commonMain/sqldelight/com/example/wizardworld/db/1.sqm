@@ -1,0 +1,12 @@
+CREATE TABLE characterEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    firstName TEXT,
+    lastName TEXT
+);
+
+CREATE TABLE characterElixirEntity (
+    characterId TEXT NOT NULL,
+    elixirId TEXT,
+    name TEXT,
+    FOREIGN KEY (characterId) REFERENCES characterEntity(id) ON DELETE CASCADE
+);

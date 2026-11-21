@@ -1,3 +1,4 @@
+
 package com.example.wizardworld
 
 import android.os.Bundle
@@ -7,15 +8,36 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Science
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.wizardworld.navigation.Destinations
-import com.example.wizardworld.ui.screens.home.HomeScreen
+import com.example.wizardworld.ui.screens.characters.CharacterDetailScreen
+import com.example.wizardworld.ui.screens.characters.CharacterListScreen
+import com.example.wizardworld.ui.screens.characters.FavoritesScreen
+import com.example.wizardworld.ui.screens.elixirs.ElixirListScreen
+import com.example.wizardworld.ui.screens.houses.HouseDetailScreen
+import com.example.wizardworld.ui.screens.houses.HouseListScreen
 import com.example.wizardworld.ui.theme.WizardWorldTheme
 
 class MainActivity : ComponentActivity() {
@@ -32,20 +54,219 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(
-    navController: NavHostController = rememberNavController(),
-) {
+fun MainScreen(navController: NavHostController = rememberNavController()) {
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val destination = backStackEntry?.destination
+
+    val isHousesSelected =
+        destination?.hasRoute<Destinations.HouseListRoute>() == true
+
+    val isCharactersSelected =
+        destination?.hasRoute<Destinations.CharacterListRoute>() == true
+
+    val isFavoritesSelected =
+        destination?.hasRoute<Destinations.FavoritesRoute>() == true
+
+    val isElixirsSelected =
+        destination?.hasRoute<Destinations.ElixirListRoute>() == true
+
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        modifier = Modifier.fillMaxSize(),
-    ) { paddingValues ->
+        bottomBar = {
+            if (
+                isHousesSelected ||
+                isCharactersSelected ||
+                isFavoritesSelected ||
+                isElixirsSelected
+            ) {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ) {
+                    NavigationBarItem(
+                        selected = isCharactersSelected,
+                        onClick = {
+                            navController.navigate(Destinations.CharacterListRoute) {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.Person,
+                                contentDescription = stringResource(R.string.nav_characters),
+                            )
+                        },
+                        label = {
+                            Text(stringResource(R.string.nav_characters))
+                        },
+                        colors =
+                            NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                    )
+
+                    NavigationBarItem(
+                        selected = isFavoritesSelected,
+                        onClick = {
+                            navController.navigate(Destinations.FavoritesRoute) {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.Favorite,
+                                contentDescription = stringResource(R.string.nav_favorites),
+                            )
+                        },
+                        label = {
+                            Text(stringResource(R.string.nav_favorites))
+                        },
+                        colors =
+                            NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                    )
+
+                    NavigationBarItem(
+                        selected = isHousesSelected,
+                        onClick = {
+                            navController.navigate(Destinations.HouseListRoute) {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.Home,
+                                contentDescription = stringResource(R.string.nav_houses),
+                            )
+                        },
+                        label = {
+                            Text(stringResource(R.string.nav_houses))
+                        },
+                        colors =
+                            NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                    )
+
+                    NavigationBarItem(
+                        selected = isElixirsSelected,
+                        onClick = {
+                            navController.navigate(Destinations.ElixirListRoute) {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.Science,
+                                contentDescription = stringResource(R.string.nav_elixirs),
+                            )
+                        },
+                        label = {
+                            Text(stringResource(R.string.nav_elixirs))
+                        },
+                        colors =
+                            NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                    )
+                }
+            }
+        },
+    ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Destinations.HomeRoute,
-            modifier = Modifier.padding(paddingValues),
+            startDestination = Destinations.CharacterListRoute,
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
         ) {
-            composable<Destinations.HomeRoute> {
-                HomeScreen()
+            composable<Destinations.HouseListRoute> {
+                HouseListScreen(
+                    onHouseClick = { houseId ->
+                        navController.navigate(
+                            Destinations.HouseDetailRoute(houseId),
+                        )
+                    },
+                )
+            }
+
+            composable<Destinations.HouseDetailRoute> { backStackEntry ->
+                val route =
+                    backStackEntry.toRoute<Destinations.HouseDetailRoute>()
+
+                HouseDetailScreen(
+                    houseId = route.houseId,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+
+            composable<Destinations.CharacterListRoute> {
+                CharacterListScreen(
+                    onCharacterClick = { characterId ->
+                        navController.navigate(
+                            Destinations.CharacterDetailRoute(characterId),
+                        )
+                    },
+                )
+            }
+
+            composable<Destinations.FavoritesRoute> {
+                FavoritesScreen(
+                    onCharacterClick = { characterId ->
+                        navController.navigate(
+                            Destinations.CharacterDetailRoute(characterId),
+                        )
+                    },
+                )
+            }
+
+            composable<Destinations.CharacterDetailRoute> { backStackEntry ->
+                val route =
+                    backStackEntry.toRoute<Destinations.CharacterDetailRoute>()
+
+                CharacterDetailScreen(
+                    characterId = route.characterId,
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                )
+            }
+
+            composable<Destinations.ElixirListRoute> {
+                ElixirListScreen()
             }
         }
     }

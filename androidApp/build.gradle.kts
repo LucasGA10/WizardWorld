@@ -15,9 +15,16 @@ dependencies {
     implementation(project(":sharedUI"))
 
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.lifecycle.runtimeCompose)
     implementation(libs.compose.material3)
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.koin.androidx.compose)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.ktor3)
 
     implementation(libs.compose.uiToolingPreview)
     debugImplementation(libs.compose.uiTooling)
