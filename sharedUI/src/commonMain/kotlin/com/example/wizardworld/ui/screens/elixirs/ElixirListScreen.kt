@@ -1,6 +1,7 @@
 
 package com.example.wizardworld.ui.screens.elixirs
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -22,7 +24,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,11 +48,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.wizardworld.domain.model.Elixir
 import com.example.wizardworld.presentation.UiState
 import com.example.wizardworld.presentation.elixirs.ElixirListViewModel
-import com.example.wizardworld.ui.components.AppLogo
 import com.example.wizardworld.ui.components.OfflineBanner
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import wizardworld.sharedui.generated.resources.Res
+import wizardworld.sharedui.generated.resources.app_logo_cd
+import wizardworld.sharedui.generated.resources.ic_app_logo
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ElixirListScreen(onElixirClick: (String) -> Unit = {}) {
     val viewModel: ElixirListViewModel = koinViewModel()
@@ -77,8 +81,10 @@ fun ElixirListScreen(onElixirClick: (String) -> Unit = {}) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     if (selectedElixir == null) {
-                        AppLogo(
-                            contentDescription = "WizardWorld",
+                        Image(
+                            painter = painterResource(Res.drawable.ic_app_logo),
+                            contentDescription = stringResource(Res.string.app_logo_cd),
+                            modifier = Modifier.size(40.dp),
                         )
                     }
 
