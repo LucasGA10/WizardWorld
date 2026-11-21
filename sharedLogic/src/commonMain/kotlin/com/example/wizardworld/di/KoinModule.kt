@@ -29,6 +29,7 @@ import com.example.wizardworld.domain.usecases.ToggleFavoriteUseCase
 import com.example.wizardworld.presentation.characters.CharacterDetailViewModel
 import com.example.wizardworld.presentation.characters.CharacterListViewModel
 import com.example.wizardworld.presentation.characters.FavoritesViewModel
+import com.example.wizardworld.presentation.elixirs.ElixirListViewModel
 import com.example.wizardworld.presentation.houses.HouseDetailViewModel
 import com.example.wizardworld.presentation.houses.HouseListViewModel
 import org.koin.core.module.dsl.factoryOf
@@ -75,6 +76,7 @@ val sharedModule =
         viewModelOf(::HouseListViewModel)
         singleOf(::HpCharacterLocalDataSource)
         viewModelOf(::FavoritesViewModel)
+        viewModelOf(::ElixirListViewModel)
         viewModel { parameters ->
             HouseDetailViewModel(
                 houseId = parameters.get(),
