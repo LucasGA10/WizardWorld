@@ -20,6 +20,7 @@ import com.example.wizardworld.domain.repository.FavoriteRepository
 import com.example.wizardworld.domain.repository.HouseRepository
 import com.example.wizardworld.domain.usecases.GetCharacterDetailUseCase
 import com.example.wizardworld.domain.usecases.GetCharactersUseCase
+import com.example.wizardworld.domain.usecases.GetElixirsUseCase
 import com.example.wizardworld.domain.usecases.GetHouseUseCase
 import com.example.wizardworld.domain.usecases.GetHousesUseCase
 import com.example.wizardworld.domain.usecases.ObserveFavoriteCharactersUseCase
@@ -69,6 +70,7 @@ val sharedModule =
         factoryOf(::ToggleFavoriteUseCase)
         factoryOf(::ObserveFavoriteCharactersUseCase)
         factoryOf(::ObserveFavoriteIdsUseCase)
+        factoryOf(::GetElixirsUseCase)
 
         viewModelOf(::HouseListViewModel)
         singleOf(::HpCharacterLocalDataSource)
