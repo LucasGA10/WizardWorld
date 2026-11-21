@@ -19,6 +19,9 @@ object Destinations {
     data object CharacterListRoute
 
     @Serializable
+    data object ElixirListRoute
+
+    @Serializable
     data class CharacterDetailRoute(
         val characterId: String,
     )

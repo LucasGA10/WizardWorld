@@ -1,3 +1,4 @@
+
 package com.example.wizardworld
 
 import android.os.Bundle
@@ -11,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -33,6 +35,7 @@ import com.example.wizardworld.navigation.Destinations
 import com.example.wizardworld.ui.screens.characters.CharacterDetailScreen
 import com.example.wizardworld.ui.screens.characters.CharacterListScreen
 import com.example.wizardworld.ui.screens.characters.FavoritesScreen
+import com.example.wizardworld.ui.screens.elixirs.ElixirListScreen
 import com.example.wizardworld.ui.screens.houses.HouseDetailScreen
 import com.example.wizardworld.ui.screens.houses.HouseListScreen
 import com.example.wizardworld.ui.theme.WizardWorldTheme
@@ -64,10 +67,18 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
     val isFavoritesSelected =
         destination?.hasRoute<Destinations.FavoritesRoute>() == true
 
+    val isElixirsSelected =
+        destination?.hasRoute<Destinations.ElixirListRoute>() == true
+
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
-            if (isHousesSelected || isCharactersSelected || isFavoritesSelected) {
+            if (
+                isHousesSelected ||
+                isCharactersSelected ||
+                isFavoritesSelected ||
+                isElixirsSelected
+            ) {
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surface,
                 ) {
@@ -88,7 +99,9 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
                                 contentDescription = stringResource(R.string.nav_characters),
                             )
                         },
-                        label = { Text(stringResource(R.string.nav_characters)) },
+                        label = {
+                            Text(stringResource(R.string.nav_characters))
+                        },
                         colors =
                             NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
@@ -98,6 +111,7 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
                                 unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                             ),
                     )
+
                     NavigationBarItem(
                         selected = isHousesSelected,
                         onClick = {
@@ -115,7 +129,9 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
                                 contentDescription = stringResource(R.string.nav_houses),
                             )
                         },
-                        label = { Text(stringResource(R.string.nav_houses)) },
+                        label = {
+                            Text(stringResource(R.string.nav_houses))
+                        },
                         colors =
                             NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
@@ -125,6 +141,7 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
                                 unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                             ),
                     )
+
                     NavigationBarItem(
                         selected = isFavoritesSelected,
                         onClick = {
@@ -142,7 +159,39 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
                                 contentDescription = stringResource(R.string.nav_favorites),
                             )
                         },
-                        label = { Text(stringResource(R.string.nav_favorites)) },
+                        label = {
+                            Text(stringResource(R.string.nav_favorites))
+                        },
+                        colors =
+                            NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                    )
+
+                    NavigationBarItem(
+                        selected = isElixirsSelected,
+                        onClick = {
+                            navController.navigate(Destinations.ElixirListRoute) {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.Science,
+                                contentDescription = stringResource(R.string.nav_elixirs),
+                            )
+                        },
+                        label = {
+                            Text(stringResource(R.string.nav_elixirs))
+                        },
                         colors =
                             NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
@@ -156,7 +205,6 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
             }
         },
     ) { innerPadding ->
-
         NavHost(
             navController = navController,
             startDestination = Destinations.CharacterListRoute,
@@ -198,11 +246,13 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
             composable<Destinations.FavoritesRoute> {
                 FavoritesScreen(
                     onCharacterClick = { characterId ->
-                        navController.navigate(Destinations.CharacterDetailRoute(characterId))
+                        navController.navigate(
+                            Destinations.CharacterDetailRoute(characterId),
+                        )
                     },
                 )
             }
-            
+
             composable<Destinations.CharacterDetailRoute> { backStackEntry ->
                 val route =
                     backStackEntry.toRoute<Destinations.CharacterDetailRoute>()
@@ -213,6 +263,10 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
                         navController.popBackStack()
                     },
                 )
+            }
+
+            composable<Destinations.ElixirListRoute> {
+                ElixirListScreen()
             }
         }
     }
