@@ -1,7 +1,7 @@
 # WizardWorld
 
-App **Kotlin Multiplatform** (Android + iOS) para explorar los personajes y las casas del mundo de Harry Potter.
-Permite listar personajes con búsqueda y paginación, ver el detalle de cada uno, marcar favoritos y consultar las casas de Hogwarts.
+App **Kotlin Multiplatform** (Android + iOS) para explorar los personajes, las casas y los elixires del mundo de Harry Potter.
+Permite listar personajes con búsqueda y paginación, ver el detalle de cada uno, marcar favoritos, consultar las casas de Hogwarts y explorar el catálogo de elixires.
 Todo funciona **sin conexión** gracias a una caché local con SQLDelight.
 
 ---
@@ -36,10 +36,19 @@ Base URL: `https://wizard-world-api.herokuapp.com/` (usado en [`HouseRepositoryI
 | `GET /Houses` | Lista de casas |
 | `GET /Houses/{id}` | Detalle de una casa |
 
+### Elixires: Wizard World API
+
+Misma base URL, cliente en [`WizardWorldApi.kt`](./sharedLogic/src/commonMain/kotlin/com/example/wizardworld/data/remote/WizardWorldApi.kt).
+
+| Endpoint | Uso | Parámetros |
+|---|---|---|
+| `GET /Elixirs` | Lista de elixires | filtros opcionales `name`, `difficulty`, `ingredient`, `inventorFullName`, `manufacturer` |
+| `GET /Elixirs/{id}` | Detalle de un elixir | `id` del elixir |
+
 > **Nota sobre el cambio de API:** al principio los personajes se obtenían de la Wizard World API con `GET /Wizards` y `GET /Wizards/{id}`
 > ([`WizardWorldApi.kt`](./sharedLogic/src/commonMain/kotlin/com/example/wizardworld/data/remote/WizardWorldApi.kt)).
 > Como `/Wizards` solo devuelve nombre, apellido y elixires (sin imagen, casa ni datos biográficos), en el issue [#44](https://github.com/LucasGA10/WizardWorld/issues/44)
-> se migró a **PotterDB**, que trae toda la información que necesitan la lista y el detalle.
+> se migró a **PotterDB**, que trae toda la información que necesitan la lista y el detalle. Hoy `WizardWorldApi` se usa para los elixires y los métodos de `/Wizards` quedaron sin uso.
 
 ### Campos que se muestran
 
@@ -59,6 +68,19 @@ Base URL: `https://wizard-world-api.herokuapp.com/` (usado en [`HouseRepositoryI
 - Enlace a la wiki de Harry Potter
 - Botón para agregar / quitar de favoritos
 
+**Lista de elixires** ([`ElixirListScreen`](./sharedUI/src/commonMain/kotlin/com/example/wizardworld/ui/screens/elixirs/ElixirListScreen.kt)), con búsqueda por nombre:
+
+- Nombre
+- Efecto
+- Dificultad
+
+**Detalle del elixir** (misma pantalla):
+
+- Nombre y dificultad
+- Efecto, efectos secundarios y características
+- Tiempo de preparación y fabricante
+- Ingredientes e inventores
+
 ---
 
 ## Arquitectura y justificación
@@ -68,8 +90,8 @@ Base URL: `https://wizard-world-api.herokuapp.com/` (usado en [`HouseRepositoryI
 | Módulo | Contenido |
 |---|---|
 | [`sharedLogic`](./sharedLogic/src) | Lógica compartida: capas **data**, **domain** y **presentation** (ViewModels), DI con Koin y base de datos SQLDelight |
-| [`sharedUI`](./sharedUI/src) | UI compartida en Compose Multiplatform: lista de personajes, tema y componentes comunes (`OfflineBanner`, `ErrorState`, `EmptyState`, shimmer) |
-| [`androidApp`](./androidApp/src) | App Android: navegación con barra inferior, detalle de personaje, favoritos y pantallas de casas |
+| [`sharedUI`](./sharedUI/src) | UI compartida en Compose Multiplatform: lista de personajes, lista y detalle de elixires, tema y componentes comunes (`WizardTopBar`, `WizardSearchBar`, `WizardPullToRefresh`, `OfflineBanner`, `ErrorState`, `EmptyState`, shimmer) |
+| [`androidApp`](./androidApp/src) | App Android: navegación con barra inferior (Personajes, Favoritos, Casas y Elixires), detalle de personaje, favoritos y pantallas de casas |
 | [`iosApp`](./iosApp) | Punto de entrada de la app iOS |
 
 ### Capas: MVVM + Clean Architecture
@@ -90,7 +112,7 @@ Base URL: `https://wizard-world-api.herokuapp.com/` (usado en [`HouseRepositoryI
 ```
 
 - **data**: habla con el mundo exterior. Clientes Ktor (`HpApi`, `WizardWorldApi`), DTOs serializados con kotlinx.serialization, mappers DTO → dominio, data sources locales sobre SQLDelight e implementaciones de los repositorios.
-- **domain**: modelos puros (`HpCharacter`, `House`, ...), interfaces de repositorio y casos de uso. No depende de Ktor, SQLDelight ni de la UI.
+- **domain**: modelos puros (`HpCharacter`, `House`, `Elixir`, ...), interfaces de repositorio y casos de uso. No depende de Ktor, SQLDelight ni de la UI.
 - **presentation**: ViewModels compartidos que combinan casos de uso y exponen `StateFlow<UiState<T>>` a las pantallas.
 
 **Por qué:** separar en capas hace que cada pieza tenga una sola responsabilidad y se pueda testear por separado
@@ -105,13 +127,14 @@ MVVM encaja naturalmente con Compose: la pantalla solo observa estado y envía e
 | `CharacterRepository` | Lista paginada / búsqueda de personajes y detalle |
 | `HouseRepository` | Lista y detalle de casas |
 | `FavoriteRepository` | Personajes favoritos guardados localmente |
+| `ElixirRepository` | Lista de elixires (con filtros) y detalle |
 
 Las interfaces están en `domain/repository` y las implementaciones en `data/repository`.
 Cada categoría evoluciona de forma independiente (por ejemplo, el cambio de API de personajes a PotterDB no tocó nada de casas) y es fácil reemplazarlas por fakes en los tests.
 
 ### Casos de uso
 
-`GetCharactersUseCase`, `GetCharacterDetailUseCase`, `GetHousesUseCase`, `GetHouseUseCase`,
+`GetCharactersUseCase`, `GetCharacterDetailUseCase`, `GetHousesUseCase`, `GetHouseUseCase`, `GetElixirsUseCase`,
 `ToggleFavoriteUseCase`, `ObserveFavoriteIdsUseCase` y `ObserveFavoriteCharactersUseCase`.
 
 Cada caso de uso representa una acción concreta del usuario. Los ViewModels dependen de ellos y no de los repositorios,
@@ -137,7 +160,7 @@ Todos los repositorios siguen la misma estrategia:
    - con datos → `Offline` (la UI muestra los datos y el banner "sin conexión");
    - sin datos → `Error` (la UI muestra el estado de error con reintento).
 
-Las tablas están en [`sharedLogic/src/commonMain/sqldelight`](./sharedLogic/src/commonMain/sqldelight/com/example/wizardworld/db) (personajes, casas y favoritos) con sus migraciones `.sqm`.
+Las tablas están en [`sharedLogic/src/commonMain/sqldelight`](./sharedLogic/src/commonMain/sqldelight/com/example/wizardworld/db) (personajes, casas, favoritos y elixires) con sus migraciones `.sqm`.
 
 **Por qué network-first:** los datos siempre se muestran actualizados cuando hay conexión y la app sigue siendo usable sin ella.
 SQLDelight genera código Kotlin tipado desde SQL y funciona en Android e iOS, por eso encaja con KMP.
@@ -167,7 +190,7 @@ Requisitos: JDK 17 y Android SDK.
 > Para iOS, abrir [`/iosApp`](./iosApp) en Xcode y ejecutar desde ahí.
 
 Los tests cubren: deserialización de DTOs, clientes de API con `MockEngine` de Ktor, repositorios con caché offline (DB SQLite en memoria),
-favoritos, casos de uso, la conversión `Resource → UiState` y el `CharacterListViewModel`.
+favoritos, mappers, casos de uso, la conversión `Resource → UiState` y los ViewModels (`CharacterListViewModel`, `ElixirListViewModel`).
 
 El CI ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)) corre los tests y el build de Android en cada PR y en cada push a `develop`.
 
@@ -178,10 +201,10 @@ El CI ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)) corre los tests
 | Nombre | GitHub | Issues | PRs |
 |---|---|---|---|
 | Juliana Samaniego | [@JSama28](https://github.com/JSama28) | [#21](https://github.com/LucasGA10/WizardWorld/issues/21), [#26](https://github.com/LucasGA10/WizardWorld/issues/26), [#27](https://github.com/LucasGA10/WizardWorld/issues/27), [#46](https://github.com/LucasGA10/WizardWorld/issues/46), [#47](https://github.com/LucasGA10/WizardWorld/issues/47), [#54](https://github.com/LucasGA10/WizardWorld/issues/54) | [#31](https://github.com/LucasGA10/WizardWorld/pull/31), [#48](https://github.com/LucasGA10/WizardWorld/pull/48), [#51](https://github.com/LucasGA10/WizardWorld/pull/51), [#52](https://github.com/LucasGA10/WizardWorld/pull/52), [#56](https://github.com/LucasGA10/WizardWorld/pull/56), [#60](https://github.com/LucasGA10/WizardWorld/pull/60) |
-| Lucas | [@LucasGA10](https://github.com/LucasGA10) | [#1](https://github.com/LucasGA10/WizardWorld/issues/1), [#3](https://github.com/LucasGA10/WizardWorld/issues/3), [#15](https://github.com/LucasGA10/WizardWorld/issues/15), [#17](https://github.com/LucasGA10/WizardWorld/issues/17), [#20](https://github.com/LucasGA10/WizardWorld/issues/20), [#32](https://github.com/LucasGA10/WizardWorld/issues/32), [#44](https://github.com/LucasGA10/WizardWorld/issues/44), [#53](https://github.com/LucasGA10/WizardWorld/issues/53), [#58](https://github.com/LucasGA10/WizardWorld/issues/58) | [#13](https://github.com/LucasGA10/WizardWorld/pull/13), [#29](https://github.com/LucasGA10/WizardWorld/pull/29), [#33](https://github.com/LucasGA10/WizardWorld/pull/33), [#42](https://github.com/LucasGA10/WizardWorld/pull/42), [#43](https://github.com/LucasGA10/WizardWorld/pull/43), [#45](https://github.com/LucasGA10/WizardWorld/pull/45), [#57](https://github.com/LucasGA10/WizardWorld/pull/57) |
-| Aguirre | [@palocipriano](https://github.com/palocipriano) | [#5](https://github.com/LucasGA10/WizardWorld/issues/5), [#8](https://github.com/LucasGA10/WizardWorld/issues/8), [#19](https://github.com/LucasGA10/WizardWorld/issues/19), [#23](https://github.com/LucasGA10/WizardWorld/issues/23) | [#30](https://github.com/LucasGA10/WizardWorld/pull/30), [#35](https://github.com/LucasGA10/WizardWorld/pull/35) |
+| Lucas | [@LucasGA10](https://github.com/LucasGA10) | [#1](https://github.com/LucasGA10/WizardWorld/issues/1), [#3](https://github.com/LucasGA10/WizardWorld/issues/3), [#15](https://github.com/LucasGA10/WizardWorld/issues/15), [#17](https://github.com/LucasGA10/WizardWorld/issues/17), [#20](https://github.com/LucasGA10/WizardWorld/issues/20), [#32](https://github.com/LucasGA10/WizardWorld/issues/32), [#44](https://github.com/LucasGA10/WizardWorld/issues/44), [#53](https://github.com/LucasGA10/WizardWorld/issues/53), [#58](https://github.com/LucasGA10/WizardWorld/issues/58) | [#13](https://github.com/LucasGA10/WizardWorld/pull/13), [#29](https://github.com/LucasGA10/WizardWorld/pull/29), [#33](https://github.com/LucasGA10/WizardWorld/pull/33), [#42](https://github.com/LucasGA10/WizardWorld/pull/42), [#43](https://github.com/LucasGA10/WizardWorld/pull/43), [#45](https://github.com/LucasGA10/WizardWorld/pull/45), [#57](https://github.com/LucasGA10/WizardWorld/pull/57), [#69](https://github.com/LucasGA10/WizardWorld/pull/69), [#71](https://github.com/LucasGA10/WizardWorld/pull/71) |
+| Aguirre | [@palocipriano](https://github.com/palocipriano) | [#5](https://github.com/LucasGA10/WizardWorld/issues/5), [#8](https://github.com/LucasGA10/WizardWorld/issues/8), [#19](https://github.com/LucasGA10/WizardWorld/issues/19), [#23](https://github.com/LucasGA10/WizardWorld/issues/23), [#36](https://github.com/LucasGA10/WizardWorld/issues/36), [#37](https://github.com/LucasGA10/WizardWorld/issues/37), [#38](https://github.com/LucasGA10/WizardWorld/issues/38), [#39](https://github.com/LucasGA10/WizardWorld/issues/39), [#40](https://github.com/LucasGA10/WizardWorld/issues/40), [#41](https://github.com/LucasGA10/WizardWorld/issues/41) | [#30](https://github.com/LucasGA10/WizardWorld/pull/30), [#35](https://github.com/LucasGA10/WizardWorld/pull/35), [#61](https://github.com/LucasGA10/WizardWorld/pull/61), [#62](https://github.com/LucasGA10/WizardWorld/pull/62), [#64](https://github.com/LucasGA10/WizardWorld/pull/64), [#65](https://github.com/LucasGA10/WizardWorld/pull/65), [#66](https://github.com/LucasGA10/WizardWorld/pull/66), [#67](https://github.com/LucasGA10/WizardWorld/pull/67), [#68](https://github.com/LucasGA10/WizardWorld/pull/68), [#70](https://github.com/LucasGA10/WizardWorld/pull/70) |
 | Franco Viscarret | [@FrancoViscarret](https://github.com/FrancoViscarret) | [#10](https://github.com/LucasGA10/WizardWorld/issues/10), [#11](https://github.com/LucasGA10/WizardWorld/issues/11), [#12](https://github.com/LucasGA10/WizardWorld/issues/12) | [#14](https://github.com/LucasGA10/WizardWorld/pull/14) |
-| Rocío Daniela Vera | [@RocioDanielaVera](https://github.com/RocioDanielaVera) | [#2](https://github.com/LucasGA10/WizardWorld/issues/2), [#4](https://github.com/LucasGA10/WizardWorld/issues/4), [#5](https://github.com/LucasGA10/WizardWorld/issues/5), [#6](https://github.com/LucasGA10/WizardWorld/issues/6), [#7](https://github.com/LucasGA10/WizardWorld/issues/7), [#9](https://github.com/LucasGA10/WizardWorld/issues/9), [#25](https://github.com/LucasGA10/WizardWorld/issues/25), [#28](https://github.com/LucasGA10/WizardWorld/issues/28), [#34](https://github.com/LucasGA10/WizardWorld/issues/34) | [#16](https://github.com/LucasGA10/WizardWorld/pull/16), [#24](https://github.com/LucasGA10/WizardWorld/pull/24), [#49](https://github.com/LucasGA10/WizardWorld/pull/49), [#50](https://github.com/LucasGA10/WizardWorld/pull/50) |
+| Rocío Daniela Vera | [@RocioDanielaVera](https://github.com/RocioDanielaVera) | [#2](https://github.com/LucasGA10/WizardWorld/issues/2), [#4](https://github.com/LucasGA10/WizardWorld/issues/4), [#5](https://github.com/LucasGA10/WizardWorld/issues/5), [#6](https://github.com/LucasGA10/WizardWorld/issues/6), [#7](https://github.com/LucasGA10/WizardWorld/issues/7), [#9](https://github.com/LucasGA10/WizardWorld/issues/9), [#25](https://github.com/LucasGA10/WizardWorld/issues/25), [#28](https://github.com/LucasGA10/WizardWorld/issues/28), [#34](https://github.com/LucasGA10/WizardWorld/issues/34) | [#16](https://github.com/LucasGA10/WizardWorld/pull/16), [#24](https://github.com/LucasGA10/WizardWorld/pull/24), [#49](https://github.com/LucasGA10/WizardWorld/pull/49), [#50](https://github.com/LucasGA10/WizardWorld/pull/50), [#63](https://github.com/LucasGA10/WizardWorld/pull/63),  [#72]([https://github.com/LucasGA10/WizardWorld/pull/63](https://github.com/LucasGA10/WizardWorld/pull/72)) |
 
 ---
 
@@ -190,3 +213,7 @@ El CI ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)) corre los tests
 | Lista de personajes | Detalle del personaje | Modo offline |
 |:---:|:---:|:---:|
 | <img src="docs/screenshots/lista.png" width="250" alt="Lista de personajes"/> | <img src="docs/screenshots/detalle.png" width="250" alt="Detalle del personaje"/> | <img src="docs/screenshots/offline.png" width="250" alt="Modo offline"/> |
+
+| Favoritos | Casas | Elixires |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/favoritos.png" width="250" alt="Favoritos"/> | <img src="docs/screenshots/casas.png" width="250" alt="Casas"/> | <img src="docs/screenshots/elixires.png" width="250" alt="Elixires"/> |
