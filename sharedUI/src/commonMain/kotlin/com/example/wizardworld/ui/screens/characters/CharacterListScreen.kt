@@ -1,12 +1,17 @@
 package com.example.wizardworld.ui.screens.characters
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,33 +25,31 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.wizardworld.presentation.UiState
 import com.example.wizardworld.presentation.characters.CharacterListViewModel
-import com.example.wizardworld.ui.components.AppLogo
 import com.example.wizardworld.ui.components.EmptyState
 import com.example.wizardworld.ui.components.ErrorState
 import com.example.wizardworld.ui.components.OfflineBanner
+import com.example.wizardworld.ui.components.WizardPullToRefresh
+import com.example.wizardworld.ui.components.WizardSearchBar
+import com.example.wizardworld.ui.components.WizardTopBar
 import com.example.wizardworld.ui.screens.characters.components.CharacterItemCard
 import com.example.wizardworld.ui.screens.characters.components.CharacterListLoading
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import wizardworld.sharedui.generated.resources.Res
@@ -54,12 +57,12 @@ import wizardworld.sharedui.generated.resources.app_logo_cd
 import wizardworld.sharedui.generated.resources.character_list_title
 import wizardworld.sharedui.generated.resources.empty_characters_message
 import wizardworld.sharedui.generated.resources.empty_characters_title
+import wizardworld.sharedui.generated.resources.ic_app_logo
 import wizardworld.sharedui.generated.resources.pagination_load_more
 import wizardworld.sharedui.generated.resources.pagination_retry
 import wizardworld.sharedui.generated.resources.search_characters
 import wizardworld.sharedui.generated.resources.search_characters_cd
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterListScreen(onCharacterClick: (String) -> Unit) {
     val viewModel: CharacterListViewModel = koinViewModel()
@@ -82,7 +85,9 @@ fun CharacterListScreen(onCharacterClick: (String) -> Unit) {
     LaunchedEffect(gridState) {
         combine(
             snapshotFlow {
-                gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+                gridState.layoutInfo.visibleItemsInfo
+                    .lastOrNull()
+                    ?.index ?: -1
             },
             viewModel.state,
         ) { lastVisibleIndex, listState ->
@@ -117,54 +122,60 @@ fun CharacterListScreen(onCharacterClick: (String) -> Unit) {
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background),
     ) {
-        TopAppBar(
+        WizardTopBar(
             title = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    AppLogo(
-                        contentDescription = stringResource(Res.string.app_logo_cd),
-                    )
-                    Text(text = stringResource(Res.string.character_list_title))
+                AnimatedContent(
+                    targetState = state.showSearchBar,
+                    transitionSpec = {
+                        fadeIn(
+                            animationSpec = tween(300),
+                        ) togetherWith
+                            fadeOut(
+                                animationSpec = tween(0),
+                            )
+                    },
+                ) { isSearch ->
+                    if (isSearch) {
+                        WizardSearchBar(
+                            searchQuery = state.nameQuery.orEmpty(),
+                            placeholder = stringResource(Res.string.search_characters),
+                            onSearchQueryChange = viewModel::onNameQueryChange,
+                            onCloseSearch = viewModel::toggleSearchBar,
+                        )
+                    } else {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Image(
+                                painter = painterResource(Res.drawable.ic_app_logo),
+                                contentDescription = stringResource(Res.string.app_logo_cd),
+                                modifier = Modifier.size(40.dp),
+                            )
+                            Text(text = stringResource(Res.string.character_list_title))
+                        }
+                    }
                 }
             },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ),
-            modifier = Modifier.shadow(elevation = 4.dp),
+            actions = {
+                if (!state.showSearchBar) {
+                    IconButton(onClick = viewModel::toggleSearchBar) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = stringResource(Res.string.search_characters_cd),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
+            },
         )
 
         OfflineBanner(visible = (state.currentState as? UiState.Success)?.isOffline == true)
 
-        SearchBar(
-            inputField = {
-                SearchBarDefaults.InputField(
-                    query = state.nameQuery.orEmpty(),
-                    onQueryChange = viewModel::onNameQueryChange,
-                    onSearch = {},
-                    expanded = false,
-                    onExpandedChange = {},
-                    placeholder = { Text(text = stringResource(Res.string.search_characters)) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Filled.Search,
-                            contentDescription = stringResource(Res.string.search_characters_cd),
-                        )
-                    },
-                )
-            },
-            expanded = false,
-            onExpandedChange = {},
-            windowInsets = WindowInsets(0, 0, 0, 0),
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-        ) {}
-
-        Box(modifier = Modifier.weight(1f)) {
+        WizardPullToRefresh(
+            isRefreshing = state.isRefreshing,
+            onRefresh = { viewModel.loadCharacters(forceRefresh = true) },
+        ) {
             when (val currentState = state.currentState) {
                 UiState.Loading -> {
                     CharacterListLoading()

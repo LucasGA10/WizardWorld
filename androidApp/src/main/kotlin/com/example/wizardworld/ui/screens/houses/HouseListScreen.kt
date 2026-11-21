@@ -1,5 +1,10 @@
 package com.example.wizardworld.ui.screens.houses
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -8,7 +13,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +27,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
@@ -33,6 +38,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,11 +56,13 @@ import com.example.wizardworld.ui.components.EmptyState
 import com.example.wizardworld.ui.components.ErrorState
 import com.example.wizardworld.ui.components.LoadingState
 import com.example.wizardworld.ui.components.OfflineBanner
+import com.example.wizardworld.ui.components.WizardPullToRefresh
+import com.example.wizardworld.ui.components.WizardSearchBar
+import com.example.wizardworld.ui.components.WizardTopBar
 import com.example.wizardworld.ui.screens.houses.components.houseAccentColor
 import com.example.wizardworld.ui.screens.houses.components.houseOnAccentColor
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HouseListScreen(
     onHouseClick: (String) -> Unit,
@@ -62,27 +72,58 @@ fun HouseListScreen(
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val isOffline by viewModel.isOffline.collectAsStateWithLifecycle()
+    var showSearchBar by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            WizardTopBar(
                 title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_app_logo),
-                            contentDescription = stringResource(R.string.app_logo_cd),
-                            modifier = Modifier.size(40.dp),
-                        )
-                        Text(text = stringResource(R.string.houses_title))
+                    AnimatedContent(
+                        targetState = showSearchBar,
+                        transitionSpec = {
+                            fadeIn(
+                                animationSpec = tween(300),
+                            ) togetherWith
+                                    fadeOut(
+                                        animationSpec = tween(0),
+                                    )
+                        },
+                    ) { isSearch ->
+                        if (isSearch) {
+                            WizardSearchBar(
+                                searchQuery = searchQuery,
+                                placeholder = stringResource(R.string.search_houses),
+                                onSearchQueryChange = viewModel::onSearchQueryChange,
+                                onCloseSearch = { showSearchBar = false },
+                            )
+                        } else {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.ic_app_logo),
+                                    contentDescription = stringResource(R.string.houses_title),
+                                    modifier = Modifier.size(40.dp),
+                                )
+                                Text(text = stringResource(R.string.houses_title),)
+                            }
+                        }
                     }
                 },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                    ),
+                actions = {
+                    if (!showSearchBar){
+                        IconButton(
+                            onClick = { showSearchBar = true },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = stringResource(R.string.search_houses_cd),
+                                tint = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
+                    }
+                },
             )
         },
     ) { innerPadding ->
@@ -93,33 +134,8 @@ fun HouseListScreen(
                     .padding(innerPadding),
         ) {
             OfflineBanner(visible = isOffline || (uiState as? UiState.Success)?.isOffline == true)
-            SearchBar(
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        query = searchQuery,
-                        onQueryChange = viewModel::onSearchQueryChange,
-                        onSearch = {},
-                        expanded = false,
-                        onExpandedChange = {},
-                        placeholder = { Text(text = stringResource(R.string.search_houses)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Filled.Search,
-                                contentDescription = stringResource(R.string.search_houses_cd),
-                            )
-                        },
-                    )
-                },
-                expanded = false,
-                onExpandedChange = {},
-                windowInsets = WindowInsets(0, 0, 0, 0),
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-            ) {}
 
-            PullToRefreshBox(
+            WizardPullToRefresh(
                 isRefreshing = isRefreshing,
                 onRefresh = viewModel::refresh,
                 modifier = Modifier.fillMaxSize(),
@@ -174,6 +190,10 @@ private fun HouseCard(
     ElevatedCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp),
     ) {
         Row(

@@ -17,6 +17,8 @@ data class CharacterListState(
     val currentState: UiState<List<HpCharacter>> = UiState.Loading,
     val paginationMeta: PaginationMeta? = null,
     val nameQuery: String? = null,
+    val isRefreshing: Boolean = false,
+    val showSearchBar: Boolean = false,
     val isLoadingMore: Boolean = false,
     val paginationError: String? = null,
 )
@@ -27,6 +29,12 @@ class CharacterListViewModel(
     private val _state = MutableStateFlow(CharacterListState())
     val state = _state.asStateFlow()
     private var loadJob: Job? = null
+
+    fun toggleSearchBar() {
+        _state.update { currentState ->
+            currentState.copy(showSearchBar = !currentState.showSearchBar)
+        }
+    }
 
     fun onNameQueryChange(query: String) {
         _state.update { it.copy(nameQuery = query) }
